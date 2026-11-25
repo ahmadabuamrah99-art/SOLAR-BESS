@@ -5,12 +5,107 @@
 <title>GreenGrid | Solar PV & BESS Project Control</title>
 <style>
 :root{--bg:#f3f7f4;--panel:#fff;--ink:#173329;--muted:#718279;--green:#16865b;--green2:#dff3e8;--lime:#b6df72;--line:#e2ebe5;--red:#c64e4e;--amber:#bd8424;--nav:#123b2c;--shadow:0 8px 28px #183e2b0b}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.45 Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--green);color:white;font-weight:650}button.secondary{background:#edf4ef;color:var(--ink);border:1px solid var(--line)}button.danger{background:#fff0ef;color:var(--red)}.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}.side{background:var(--nav);color:#eaf5ee;padding:24px 16px;display:flex;flex-direction:column;gap:24px}.brand{display:flex;gap:11px;align-items:center;padding:0 8px}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#b6df72,#29a875);display:grid;place-items:center;color:#123b2c;font-size:22px}.brand strong{display:block;letter-spacing:.08em}.brand small{color:#a8c5b4}.nav{display:grid;gap:6px}.nav button{background:transparent;text-align:left;color:#c8ded1;font-weight:550;padding:12px}.nav button.active,.nav button:hover{background:#ffffff19;color:white}.sidefoot{margin-top:auto;color:#a8c5b4;font-size:12px;padding:8px}.main{min-width:0}.top{height:76px;background:#ffffffd9;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}.top small{color:var(--muted)}.top strong{font-size:16px}.user{display:flex;gap:10px;align-items:center}.avatar{width:34px;height:34px;border-radius:50%;background:var(--green2);color:var(--green);display:grid;place-items:center;font-weight:800}.content{padding:28px 30px;max-width:1600px;margin:auto}.heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:22px}.eyebrow{color:var(--green);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.heading h1{margin:4px 0;font-size:27px;letter-spacing:-.03em}.sub{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}.kpi-label{color:var(--muted);font-size:12px}.kpi{font-size:30px;font-weight:800;margin:7px 0 2px;letter-spacing:-.04em}.kpi-note{font-size:11px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px}.two{grid-template-columns:1.3fr .9fr}.three{grid-template-columns:repeat(3,1fr)}h2{font-size:16px;margin:0 0 14px}h3{font-size:14px;margin:0 0 10px}.chart{height:220px;display:flex;align-items:end;gap:14px;padding:15px 8px 4px;border-bottom:1px solid var(--line)}.barwrap{height:100%;flex:1;display:flex;align-items:end;gap:5px;justify-content:center;position:relative}.bar{width:34%;min-width:8px;border-radius:7px 7px 2px 2px;background:#cde8d7}.bar.actual{background:linear-gradient(#36b47a,#16865b)}.barlabel{position:absolute;bottom:-24px;font-size:10px;color:var(--muted)}.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:28px}.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.progressrow{margin:13px 0}.rowtop{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:6px}.track{height:8px;border-radius:10px;background:#edf3ef;overflow:hidden}.fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#42b77d,#16865b)}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;color:var(--muted);font-weight:650;background:#f8fbf9}td,th{padding:12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}tr:last-child td{border-bottom:0}.pill{padding:4px 8px;border-radius:20px;font-size:10px;font-weight:750;background:#edf5ef;color:#24764f}.pill.warn{background:#fff5df;color:#9a6a16}.pill.bad{background:#fff0ef;color:#b34545}.pill.gray{background:#f0f2f1;color:#68756e}.section{display:none}.section.active{display:block}.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:11px;color:var(--muted);font-weight:700}.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink)}.field textarea{min-height:72px;resize:vertical}.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 12px}.modal{position:fixed;inset:0;background:#102b2080;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal.open{display:flex}.modalbox{width:min(560px,100%);max-height:90vh;overflow:auto;background:white;border-radius:18px;padding:22px}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.close{background:#edf4ef;color:var(--ink);padding:6px 10px}.notice{background:#f0f8f2;border:1px solid #d9eddf;padding:12px 14px;border-radius:12px;color:#426454;font-size:12px;margin-bottom:16px}.empty{padding:24px;text-align:center;color:var(--muted)}.mobilemenu{display:none}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.45 Inter,Segoe UI,Arial,sans-serif;color:var(--ink)}button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 14px;background:var(--green);color:white;font-weight:650}button:disabled{opacity:.5;cursor:not-allowed}button.secondary{background:#edf4ef;color:var(--ink);border:1px solid var(--line)}button.danger{background:#fff0ef;color:var(--red)}.app{display:grid;grid-template-columns:248px 1fr;min-height:100vh}.side{background:var(--nav);color:#eaf5ee;padding:24px 16px;display:flex;flex-direction:column;gap:24px}.brand{display:flex;gap:11px;align-items:center;padding:0 8px}.logo{width:40px;height:40px;border-radius:13px;background:linear-gradient(145deg,#b6df72,#29a875);display:grid;place-items:center;color:#123b2c;font-size:22px}.brand strong{display:block;letter-spacing:.08em}.brand small{color:#a8c5b4}.nav{display:grid;gap:6px}.nav button{background:transparent;text-align:left;color:#c8ded1;font-weight:550;padding:12px}.nav button.active,.nav button:hover{background:#ffffff19;color:white}.sidefoot{margin-top:auto;color:#a8c5b4;font-size:12px;padding:8px}.main{min-width:0}.top{height:76px;background:#ffffffd9;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 30px;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}.top small{color:var(--muted)}.top strong{font-size:16px}.user{display:flex;gap:10px;align-items:center}.avatar{width:34px;height:34px;border-radius:50%;background:var(--green2);color:var(--green);display:grid;place-items:center;font-weight:800}.content{padding:28px 30px;max-width:1600px;margin:auto}.heading{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:22px}.eyebrow{color:var(--green);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}.heading h1{margin:4px 0;font-size:27px;letter-spacing:-.03em}.sub{color:var(--muted)}.actions{display:flex;gap:8px;flex-wrap:wrap}.grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px}.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:var(--shadow);min-width:0}.kpi-label{color:var(--muted);font-size:12px}.kpi{font-size:30px;font-weight:800;margin:7px 0 2px;letter-spacing:-.04em}.kpi.small{font-size:20px}.kpi-note{font-size:11px;color:var(--muted)}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);margin-right:6px}.two{grid-template-columns:1.3fr .9fr}.three{grid-template-columns:repeat(3,1fr)}h2{font-size:16px;margin:0 0 14px}h3{font-size:14px;margin:0 0 10px}.chart{height:220px;display:flex;align-items:end;gap:6px;padding:15px 8px 4px;border-bottom:1px solid var(--line);overflow-x:auto}.barwrap{height:100%;min-width:26px;flex:1;display:flex;align-items:end;gap:3px;justify-content:center;position:relative}.bar{width:40%;min-width:6px;border-radius:7px 7px 2px 2px;background:#cde8d7}.bar.actual{background:linear-gradient(#36b47a,#16865b)}.barlabel{position:absolute;bottom:-22px;font-size:10px;color:var(--muted)}.legend{display:flex;gap:14px;font-size:11px;color:var(--muted);margin-top:28px}.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}.progressrow{margin:13px 0}.rowtop{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:6px}.track{height:8px;border-radius:10px;background:#edf3ef;overflow:hidden}.fill{height:100%;border-radius:10px;background:linear-gradient(90deg,#42b77d,#16865b)}.tablewrap{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th{text-align:left;color:var(--muted);font-weight:650;background:#f8fbf9}td,th{padding:12px 10px;border-bottom:1px solid var(--line);white-space:nowrap}td.wrap{white-space:normal;min-width:180px}tr:last-child td{border-bottom:0}.pill{padding:4px 8px;border-radius:20px;font-size:10px;font-weight:750;background:#edf5ef;color:#24764f}.pill.warn{background:#fff5df;color:#9a6a16}.pill.bad{background:#fff0ef;color:#b34545}.pill.gray{background:#f0f2f1;color:#68756e}.section{display:none}.section.active{display:block}.field{display:grid;gap:5px;margin-bottom:12px}.field label{font-size:11px;color:var(--muted);font-weight:700}.field input,.field select,.field textarea{width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:white;color:var(--ink)}.field textarea{min-height:72px;resize:vertical}.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:0 12px}.modal{position:fixed;inset:0;background:#102b2080;display:none;align-items:center;justify-content:center;padding:18px;z-index:20}.modal.open{display:flex}.modalbox{width:min(560px,100%);max-height:90vh;overflow:auto;background:white;border-radius:18px;padding:22px}.modalhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.close{background:#edf4ef;color:var(--ink);padding:6px 10px}.notice{background:#f0f8f2;border:1px solid #d9eddf;padding:12px 14px;border-radius:12px;color:#426454;font-size:12px;margin-bottom:16px}.notice.demo{background:#fff8e8;border-color:#f1dfae;color:#7a5410}.empty{padding:24px;text-align:center;color:var(--muted)}.msg{font-size:12px;margin-top:10px;color:var(--muted)}.msg.err{color:var(--red)}.msg.ok{color:var(--green)}.hidden{display:none!important}.inline{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.small-btn{padding:6px 10px;font-size:12px}.toast{position:fixed;bottom:18px;right:18px;background:var(--nav);color:#fff;padding:12px 16px;border-radius:12px;z-index:30;display:none;max-width:360px;font-size:13px;box-shadow:var(--shadow)}.toast.show{display:block}.toast.err{background:var(--red)}
+/* Role-based visibility. Enforcement is in the database; this only hides controls. */
+.role-viewer [data-write],.role-viewer [data-admin],.role-engineer [data-admin]{display:none!important}
+/* Auth screens */
+.auth-wrap{min-height:100vh;display:grid;place-items:center;background:var(--bg);padding:20px}
+.auth-card{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow)}
+.auth-card .logo{margin-bottom:14px}
+.auth-card h1{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}
+.auth-card form{margin-top:16px}
+.auth-card button[type=submit]{width:100%;margin-top:6px}
+.linkbtn{background:none;color:var(--green);padding:0;border-radius:0;font-weight:650;margin-top:12px}
+.topbar-right{display:flex;gap:10px;align-items:center}
+.approval-note{font-size:11px;color:var(--muted)}
 @media(max-width:1000px){.app{grid-template-columns:210px 1fr}.kpis{grid-template-columns:repeat(2,1fr)}.two{grid-template-columns:1fr}}
-@media(max-width:700px){.app{display:block}.side{display:none}.top{padding:0 16px}.content{padding:20px 14px}.heading{display:block}.actions{margin-top:14px}.kpis{grid-template-columns:repeat(2,1fr)}.three{grid-template-columns:1fr}.mobilemenu{display:inline-block}.formgrid{grid-template-columns:1fr}}
-</style></head>
+@media(max-width:700px){
+ .app{display:block}
+ .side{flex-direction:row;overflow-x:auto;padding:10px 12px;gap:8px;align-items:center}
+ .brand,.sidefoot{display:none}
+ .nav{display:flex;gap:6px}
+ .nav button{white-space:nowrap;padding:8px 10px;font-size:13px}
+ .top{height:auto;padding:12px 16px;flex-wrap:wrap;gap:10px}
+ .content{padding:20px 14px}
+ .heading{display:block}
+ .actions{margin-top:14px}
+ .kpis{grid-template-columns:repeat(2,1fr)}
+ .three{grid-template-columns:1fr}
+ .formgrid{grid-template-columns:1fr}
+ .topbar-right{width:100%;justify-content:space-between}
+}
+</style>
+</head>
 <body>
-<div class="app">
+
+<!-- Configuration error (shown when js/config.js is not filled in) -->
+<div id="viewSetup" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="logo">☀</div>
+    <h1>Configuration required</h1>
+    <p class="sub">Set <code>SUPABASE_URL</code> and <code>SUPABASE_ANON_KEY</code> in <code>js/config.js</code>. Use the project URL and the publishable/anon key only.</p>
+  </div>
+</div>
+
+<!-- Sign in -->
+<div id="viewLogin" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="logo">☀</div>
+    <h1>Sign in to GreenGrid</h1>
+    <p class="sub">Solar PV & BESS Project Control</p>
+    <form id="loginForm" novalidate>
+      <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" name="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required></div>
+      <button type="submit">Sign in</button>
+      <div class="msg" id="loginMsg"></div>
+    </form>
+    <button class="linkbtn" id="showResetBtn" type="button">Forgot password?</button>
+    <p class="approval-note">Accounts are created by a project Admin. Public sign-up is disabled.</p>
+  </div>
+</div>
+
+<!-- Password reset request -->
+<div id="viewReset" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="logo">☀</div>
+    <h1>Reset password</h1>
+    <p class="sub">Enter your work email. If an account exists, we will send a reset link.</p>
+    <form id="resetForm" novalidate>
+      <div class="field"><label for="resetEmail">Email</label><input id="resetEmail" name="email" type="email" autocomplete="username" required></div>
+      <button type="submit">Send reset link</button>
+      <div class="msg" id="resetMsg"></div>
+    </form>
+    <button class="linkbtn" id="showLoginBtn" type="button">Back to sign in</button>
+  </div>
+</div>
+
+<!-- Set new password (opened from the reset email) -->
+<div id="viewNewPassword" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="logo">☀</div>
+    <h1>Set a new password</h1>
+    <p class="sub">Use at least 8 characters.</p>
+    <form id="newPasswordForm" novalidate>
+      <div class="field"><label for="newPassword">New password</label><input id="newPassword" name="password" type="password" autocomplete="new-password" minlength="8" required></div>
+      <div class="field"><label for="newPassword2">Confirm new password</label><input id="newPassword2" name="password2" type="password" autocomplete="new-password" minlength="8" required></div>
+      <button type="submit">Save password</button>
+      <div class="msg" id="newPasswordMsg"></div>
+    </form>
+  </div>
+</div>
+
+<!-- Signed in but no active profile -->
+<div id="viewInactive" class="auth-wrap hidden">
+  <div class="auth-card">
+    <div class="logo">☀</div>
+    <h1>Account not active</h1>
+    <p class="sub">Your account has no active access to this project. Contact a project Admin.</p>
+    <button class="secondary" id="inactiveSignOutBtn" type="button">Sign out</button>
+  </div>
+</div>
+
+<!-- Main application -->
+<div id="viewApp" class="app hidden">
 <aside class="side">
  <div class="brand"><div class="logo">☀</div><div><strong>GREENGRID</strong><small>PROJECT CONTROL</small></div></div>
  <div class="nav" id="nav">
@@ -24,145 +119,113 @@
   <button data-page="issues">⚑ &nbsp; Issues & Risks</button>
   <button data-page="reports">▤ &nbsp; Reports & Data</button>
  </div>
- <div class="sidefoot">Solar PV + BESS<br>Project workspace · Prototype v1.0</div>
+ <div class="sidefoot">Solar PV + BESS<br>Project workspace · Phase 2</div>
 </aside>
 <main class="main">
- <header class="top"><div><small>PROJECT WORKSPACE / <span id="crumb">OVERVIEW</span></small><br><strong id="topTitle">Project Overview</strong></div><div class="user"><button class="secondary mobilemenu" onclick="alert('Use the desktop navigation or widen your screen.')">☰</button><div class="avatar" id="avatar">SE</div><div><strong id="userName">Site Engineer</strong><br><small id="userRole">Editor</small></div><select id="roleSelect" title="Demo role" style="border:1px solid var(--line);border-radius:8px;padding:7px"><option>Editor</option><option>Manager</option><option>Viewer</option></select></div></header>
+ <header class="top">
+  <div><small>PROJECT WORKSPACE / <span id="crumb">OVERVIEW</span></small><br><strong id="topTitle">Project Overview</strong></div>
+  <div class="topbar-right">
+   <div class="user"><div class="avatar" id="avatar">--</div><div><strong id="userName">Loading…</strong><br><small id="userRole">—</small></div></div>
+   <button class="secondary small-btn" id="logoutBtn" type="button">Sign out</button>
+  </div>
+ </header>
  <div class="content">
+
  <section id="overview" class="section active">
-  <div class="heading"><div><div class="eyebrow">Project performance</div><h1>Project Overview</h1><div class="sub">A clear view of site execution, progress and constraints.</div></div><div class="actions"><button class="secondary" onclick="exportCSV()">↓ Export CSV</button><button onclick="openUpdate()">＋ Add Progress Update</button></div></div>
-  <div class="notice">Demo workspace initialized with sample activities. Replace sample quantities with approved project data before using reports for management decisions.</div>
+  <div class="heading"><div><div class="eyebrow">Project performance</div><h1>Project Overview</h1><div class="sub">A clear view of site execution, progress and constraints.</div></div><div class="actions"><button class="secondary" data-action="export-csv">↓ Export CSV</button><button data-write data-action="log-progress">＋ Add Progress Update</button></div></div>
+  <div id="overviewNotice" class="notice">Loading project data…</div>
   <div class="grid kpis">
-   <div class="card"><div class="kpi-label">Overall Physical Progress</div><div class="kpi" id="overall">0%</div><div class="kpi-note"><span class="dot"></span>Weighted actual completion</div></div>
-   <div class="card"><div class="kpi-label">Planned Progress</div><div class="kpi" id="planned">0%</div><div class="kpi-note">Current approved baseline</div></div>
-   <div class="card"><div class="kpi-label">Schedule Variance</div><div class="kpi" id="variance">0%</div><div class="kpi-note">Actual minus planned</div></div>
-   <div class="card"><div class="kpi-label">Open Issues</div><div class="kpi" id="openIssues">0</div><div class="kpi-note">Items requiring follow-up</div></div>
+   <div class="card"><div class="kpi-label">Overall Physical Progress</div><div class="kpi small" id="overall">—</div><div class="kpi-note" id="overallNote"></div></div>
+   <div class="card"><div class="kpi-label">Planned Progress</div><div class="kpi small" id="planned">—</div><div class="kpi-note" id="plannedNote"></div></div>
+   <div class="card"><div class="kpi-label">Activities Complete</div><div class="kpi" id="completeCount">0</div><div class="kpi-note" id="completeNote">Activities at 100% of planned quantity</div></div>
+   <div class="card"><div class="kpi-label">Open Issues</div><div class="kpi" id="openIssues">0</div><div class="kpi-note">Issues not yet closed</div></div>
   </div>
   <div class="grid two">
-   <div class="card"><h2>Planned vs Actual Progress</h2><div class="chart" id="chart"></div><div class="legend"><span><i style="background:#cde8d7"></i>Planned</span><span><i style="background:#16865b"></i>Actual</span></div></div>
-   <div class="card"><h2>Workstream Completion</h2><div id="workstreams"></div></div>
+   <div class="card"><h2>Planned vs Actual by Activity</h2><div class="chart" id="chart"></div><div class="legend"><span><i style="background:#cde8d7"></i>Planned %</span><span><i style="background:#16865b"></i>Actual %</span></div></div>
+   <div class="card"><h2>Workstream & Discipline</h2><p class="kpi-note">Quantities are not added across different units. Weighted progress appears only after verified weights are entered by an Admin.</p><div id="workstreams"></div></div>
   </div>
   <div class="card" style="margin-top:16px"><h2>Priority Activities</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Planned</th><th>Actual</th><th>Variance</th><th>Status</th></tr></thead><tbody id="priorityRows"></tbody></table></div></div>
  </section>
+
  <section id="solar" class="section">
-  <div class="heading"><div><div class="eyebrow">Generation assets</div><h1>Solar PV Progress</h1><div class="sub">Track mechanical and electrical installation by measurable quantities.</div></div><div class="actions"><button onclick="openActivity('Solar PV')">＋ Add Activity</button></div></div>
+  <div class="heading"><div><div class="eyebrow">Generation assets</div><h1>Solar PV Progress</h1><div class="sub">Track mechanical and electrical installation by measurable quantities.</div></div><div class="actions"><button data-admin data-action="add-activity" data-area="Solar PV">＋ Add Activity</button></div></div>
   <div class="grid two"><div class="card"><h2>Mechanical Works</h2><div id="solarMechanical"></div></div><div class="card"><h2>Electrical Works</h2><div id="solarElectrical"></div></div></div>
   <div class="card" style="margin-top:16px"><h2>Solar PV Activity Register</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Unit</th><th>Planned Qty</th><th>Installed Qty</th><th>Progress</th><th>Action</th></tr></thead><tbody id="solarRows"></tbody></table></div></div>
  </section>
+
  <section id="bess" class="section">
-  <div class="heading"><div><div class="eyebrow">Energy storage system</div><h1>BESS Progress</h1><div class="sub">Track each BESS block, PCS, transformers, RMU, E-House and commissioning.</div></div><div class="actions"><button onclick="openActivity('BESS')">＋ Add Activity</button></div></div>
+  <div class="heading"><div><div class="eyebrow">Energy storage system</div><h1>BESS Progress</h1><div class="sub">Block-level status and the BESS activity register.</div></div><div class="actions"><button data-write data-action="add-block">＋ Add Block</button><button data-admin data-action="add-activity" data-area="BESS">＋ Add Activity</button></div></div>
   <div class="grid three" id="bessCards"></div>
-  <div class="card" style="margin-top:16px"><h2>BESS Activity Register</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Unit</th><th>Planned Qty</th><th>Installed Qty</th><th>Progress</th><th>Action</th></tr></thead><tbody id="bessRows"></tbody></table></div></div>
+  <div class="card" style="margin-top:16px"><h2>BESS Activity Register</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Unit</th><th>Planned Qty</th><th>Installed Qty</th><th>Progress</th><th>Action</th></tr></thead><tbody id="bessRows"></tbody></table></div></div>
  </section>
+
  <section id="schedule" class="section">
-  <div class="heading"><div><div class="eyebrow">Time management</div><h1>Schedule & Planning</h1><div class="sub">Compare baseline and actual progress; maintain daily, weekly and monthly records.</div></div><div class="actions"><button onclick="openUpdate()">＋ Log Update</button></div></div>
+  <div class="heading"><div><div class="eyebrow">Time management</div><h1>Schedule & Planning</h1><div class="sub">Progress log history. Daily, weekly and monthly entries.</div></div><div class="actions"><button data-write data-action="log-progress">＋ Log Update</button></div></div>
   <div class="grid three"><div class="card"><div class="kpi-label">Daily Logs</div><div class="kpi" id="dailyCount">0</div></div><div class="card"><div class="kpi-label">Weekly Logs</div><div class="kpi" id="weeklyCount">0</div></div><div class="card"><div class="kpi-label">Monthly Logs</div><div class="kpi" id="monthlyCount">0</div></div></div>
-  <div class="card" style="margin-top:16px"><h2>Progress Update History</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Period</th><th>Activity</th><th>Quantity Added</th><th>Notes</th><th>Updated By</th></tr></thead><tbody id="updateRows"></tbody></table></div></div>
+  <div class="card" style="margin-top:16px"><h2>Progress Update History</h2><div class="tablewrap"><table><thead><tr><th>Date</th><th>Period</th><th>Activity</th><th>Quantity Added</th><th>Notes</th><th>Logged By</th></tr></thead><tbody id="updateRows"></tbody></table></div></div>
  </section>
+
  <section id="qaqc" class="section">
-  <div class="heading"><div><div class="eyebrow">Quality assurance & control</div><h1>QA/QC Register</h1><div class="sub">Manage inspections, test requests and non-conformance items.</div></div><button onclick="openRecord('qaqc')">＋ Add QA/QC Record</button></div>
-  <div class="grid three" id="qaqcKpis"></div><div class="card" style="margin-top:16px"><div class="tablewrap"><table><thead><tr><th>Reference</th><th>Type</th><th>Description</th><th>Date</th><th>Status</th><th>Owner</th></tr></thead><tbody id="qaqcRows"></tbody></table></div></div>
+  <div class="heading"><div><div class="eyebrow">Quality assurance & control</div><h1>QA/QC Register</h1><div class="sub">Engineers create and submit records. Admins approve, reject or close them.</div></div><div class="actions"><button data-write data-action="add-qaqc">＋ Add QA/QC Record</button></div></div>
+  <div class="grid three" id="qaqcKpis"></div>
+  <div class="card" style="margin-top:16px"><div class="tablewrap"><table><thead><tr><th>Reference</th><th>Type</th><th>Description</th><th>Date</th><th>Status</th><th>Owner</th><th>Action</th></tr></thead><tbody id="qaqcRows"></tbody></table></div></div>
  </section>
+
  <section id="hse" class="section">
-  <div class="heading"><div><div class="eyebrow">Health, safety & environment</div><h1>HSE Register</h1><div class="sub">Record observations, toolbox talks, incidents and man-hours.</div></div><button onclick="openRecord('hse')">＋ Add HSE Record</button></div>
-  <div class="grid three" id="hseKpis"></div><div class="card" style="margin-top:16px"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Severity</th><th>Status</th><th>Owner</th></tr></thead><tbody id="hseRows"></tbody></table></div></div>
+  <div class="heading"><div><div class="eyebrow">Health, safety & environment</div><h1>HSE Register</h1><div class="sub">Record observations, toolbox talks, incidents and inspections.</div></div><div class="actions"><button data-write data-action="add-hse">＋ Add HSE Record</button></div></div>
+  <div class="grid three" id="hseKpis"></div>
+  <div class="card" style="margin-top:16px"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Severity</th><th>Status</th><th>Owner</th><th>Action</th></tr></thead><tbody id="hseRows"></tbody></table></div></div>
  </section>
+
  <section id="manpower" class="section">
-  <div class="heading"><div><div class="eyebrow">Resources</div><h1>Manpower & Equipment</h1><div class="sub">Daily workforce and equipment availability snapshot.</div></div><button onclick="openRecord('manpower')">＋ Add Daily Snapshot</button></div>
-  <div class="grid three" id="resourceKpis"></div><div class="card" style="margin-top:16px"><div class="tablewrap"><table><thead><tr><th>Date</th><th>Engineers</th><th>Technicians</th><th>Workers</th><th>Equipment Available</th><th>Notes</th></tr></thead><tbody id="resourceRows"></tbody></table></div></div>
+  <div class="heading"><div><div class="eyebrow">Resources</div><h1>Manpower & Equipment</h1><div class="sub">Daily headcount by category, equipment register and daily equipment status.</div></div><div class="actions"><button data-write data-action="add-manpower">＋ Add Daily Headcount</button><button data-write data-action="add-equipment">＋ Add Equipment</button><button data-write data-action="log-equipment">＋ Log Equipment Status</button></div></div>
+  <div class="grid three" id="resourceKpis"></div>
+  <div class="card" style="margin-top:16px"><h2>Daily Manpower by Category</h2><div class="tablewrap"><table><thead id="manpowerHead"></thead><tbody id="manpowerRows"></tbody></table></div></div>
+  <div class="card" style="margin-top:16px"><h2>Equipment Register</h2><div class="tablewrap"><table><thead><tr><th>Code</th><th>Description</th><th>Type</th><th>Area</th><th>Supplier</th><th>Register Status</th></tr></thead><tbody id="equipmentRows"></tbody></table></div></div>
+  <div class="card" style="margin-top:16px"><div class="inline" style="justify-content:space-between;margin-bottom:12px"><h2 style="margin:0">Equipment Status</h2><div class="field" style="margin:0;min-width:180px"><label for="equipDate">Date</label><input id="equipDate" type="date"></div></div><div class="tablewrap"><table><thead><tr><th>Code</th><th>Availability</th><th>Operating Status</th><th>Hours Available</th><th>Hours Used</th><th>Notes</th></tr></thead><tbody id="equipmentLogRows"></tbody></table></div></div>
  </section>
+
  <section id="issues" class="section">
-  <div class="heading"><div><div class="eyebrow">Project constraints</div><h1>Issues & Risks</h1><div class="sub">Track blockers, assign ownership and close actions.</div></div><button onclick="openRecord('issues')">＋ Add Issue</button></div>
-  <div class="card"><div class="tablewrap"><table><thead><tr><th>ID</th><th>Issue</th><th>Category</th><th>Priority</th><th>Due Date</th><th>Owner</th><th>Status</th><th>Action</th></tr></thead><tbody id="issueRows"></tbody></table></div></div>
+  <div class="heading"><div><div class="eyebrow">Project constraints</div><h1>Issues & Risks</h1><div class="sub">Track blockers, assign ownership and close actions.</div></div><div class="actions"><button data-write data-action="add-issue">＋ Add Issue</button></div></div>
+  <div class="card"><div class="tablewrap"><table><thead><tr><th>ID</th><th>Type</th><th>Issue</th><th>Category</th><th>Priority</th><th>Due Date</th><th>Owner</th><th>Status</th><th>Action</th></tr></thead><tbody id="issueRows"></tbody></table></div></div>
  </section>
+
  <section id="reports" class="section">
-  <div class="heading"><div><div class="eyebrow">Management reporting</div><h1>Reports & Data</h1><div class="sub">Export registers, save a backup or restore project data.</div></div></div>
-  <div class="grid two"><div class="card"><h2>Progress Reports</h2><p class="sub">Create a dated report from the current project records.</p><div class="field"><label>Reporting period</label><select id="reportPeriod"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div><button onclick="generateReport()">Generate Report</button> <button class="secondary" onclick="window.print()">Print / Save PDF</button><div id="reportPreview" style="margin-top:16px"></div></div>
-  <div class="card"><h2>Data Management</h2><p class="sub">Download a full JSON backup or restore it on this browser.</p><div class="actions"><button onclick="backup()">↓ Backup JSON</button><label class="secondary" style="padding:10px 14px;border-radius:10px;cursor:pointer">↑ Restore JSON<input type="file" accept=".json,application/json" hidden onchange="restore(event)"></label></div><hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3>Project settings</h3><div class="field"><label>Project name</label><input id="projectName" value="Solar PV & BESS Project"></div><div class="field"><label>PV capacity (MW)</label><input id="pvCapacity" type="number" value="232"></div><div class="field"><label>BESS capacity (MWh)</label><input id="bessCapacity" type="number" value="526"></div><button onclick="saveSettings()">Save Settings</button><p class="kpi-note" style="margin-top:12px">Data is currently stored in this browser only. Shared multi-user access requires a hosted database and user authentication.</p></div></div>
+  <div class="heading"><div><div class="eyebrow">Management reporting</div><h1>Reports & Data</h1><div class="sub">Create dated reports from the database, save drafts, issue reports, and manage project settings.</div></div></div>
+  <div class="grid two">
+   <div class="card">
+    <h2>Progress Reports</h2>
+    <div class="formgrid">
+     <div class="field"><label for="reportPeriod">Reporting period</label><select id="reportPeriod"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div>
+     <div class="field"><label for="reportDate">Report date</label><input id="reportDate" type="date"></div>
+    </div>
+    <div class="actions">
+     <button data-action="report-generate">Generate Preview</button>
+     <button class="secondary" data-action="print-report">Print / Save PDF</button>
+     <button class="secondary" data-write data-action="report-save">Save as Draft</button>
+    </div>
+    <div id="reportPreview" style="margin-top:16px"></div>
+   </div>
+   <div class="card">
+    <h2>Data Management</h2>
+    <p class="sub">Download a JSON copy of the project data. Restore is disabled because it would overwrite shared data.</p>
+    <div class="actions"><button data-action="backup">↓ Backup JSON</button><button class="secondary" disabled title="Disabled: restoring would overwrite shared project data">↑ Restore JSON (disabled)</button></div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+    <h3>Project settings</h3>
+    <div id="settingsBox"></div>
+    <hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+    <h3>Saved reports</h3>
+    <div class="tablewrap"><table><thead><tr><th>Title</th><th>Period</th><th>Status</th><th>Action</th></tr></thead><tbody id="savedReportRows"></tbody></table></div>
+   </div>
+  </div>
+  <div class="card" style="margin-top:16px" data-admin><h2>User Access</h2><p class="kpi-note">Roles change here. New accounts are invited in the Supabase Dashboard (Authentication → Users). The database keeps at least one active Admin.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Role</th><th>Active</th></tr></thead><tbody id="usersRows"></tbody></table></div></div>
  </section>
+
  </div></main></div>
-<div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle">Add Record</h2><button class="close" onclick="closeModal()">✕</button></div><div id="modalBody"></div></div></div>
-<script>
-const seed={
- settings:{name:"Solar PV & BESS Project",pv:232,bess:526},
- activities:[
- {id:1,area:"Solar PV",name:"Piling Installation",discipline:"Mechanical",unit:"Piles",planned:1000,actual:720,plan:80},
- {id:2,area:"Solar PV",name:"Structure Installation",discipline:"Mechanical",unit:"Tables",planned:800,actual:560,plan:72},
- {id:3,area:"Solar PV",name:"Module Installation",discipline:"Mechanical",unit:"Modules",planned:50000,actual:31000,plan:55},
- {id:4,area:"Solar PV",name:"Torque Inspection",discipline:"QA/QC",unit:"Tables",planned:800,actual:400,plan:55},
- {id:5,area:"Solar PV",name:"DC Cable Installation",discipline:"Electrical",unit:"Meters",planned:120000,actual:45000,plan:45},
- {id:6,area:"Solar PV",name:"Inverter Installation",discipline:"Electrical",unit:"Units",planned:80,actual:35,plan:50},
- {id:7,area:"Solar PV",name:"AC Cable Installation",discipline:"Electrical",unit:"Meters",planned:25000,actual:9000,plan:35},
- {id:8,area:"Solar PV",name:"Earthing Installation",discipline:"Electrical",unit:"Points",planned:900,actual:380,plan:50},
- {id:9,area:"BESS",name:"Battery Container Installation",discipline:"Mechanical",unit:"Containers",planned:6,actual:2,plan:50},
- {id:10,area:"BESS",name:"PCS Installation",discipline:"Electrical",unit:"Units",planned:6,actual:2,plan:45},
- {id:11,area:"BESS",name:"BESS Transformer Installation",discipline:"Electrical",unit:"Units",planned:6,actual:1,plan:35},
- {id:12,area:"BESS",name:"RMU Installation",discipline:"Electrical",unit:"Units",planned:6,actual:1,plan:30},
- {id:13,area:"BESS",name:"E-House Installation",discipline:"Electrical",unit:"Units",planned:2,actual:1,plan:40},
- {id:14,area:"BESS",name:"Testing & Commissioning",discipline:"Commissioning",unit:"Systems",planned:6,actual:0,plan:5}
- ],
- updates:[],qaqc:[],hse:[],manpower:[],issues:[]
-};
-let data=load();
-function load(){try{return JSON.parse(localStorage.getItem("greengrid_data"))||structuredClone(seed)}catch(e){return structuredClone(seed)}}
-function save(){localStorage.setItem("greengrid_data",JSON.stringify(data));render()}
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function pct(a){return a.planned?Math.min(100,Math.round(a.actual/a.planned*100)):0}
-function status(a){let d=pct(a)-a.plan;return d>=3?["Ahead","pill"]:d<=-5?["Delayed","pill bad"]:["On Track","pill"]}
-function avg(arr,key){return arr.length?Math.round(arr.reduce((s,x)=>s+x[key],0)/arr.length):0}
-function overall(){let a=data.activities;let total=a.reduce((s,x)=>s+x.planned,0),actual=a.reduce((s,x)=>s+Math.min(x.actual,x.planned),0);return total?Math.round(actual/total*100):0}
-function render(){
- document.getElementById("projectName").value=data.settings.name;document.getElementById("pvCapacity").value=data.settings.pv;document.getElementById("bessCapacity").value=data.settings.bess;
- const all=data.activities,act=overall(),plan=avg(all,"plan"),open=data.issues.filter(x=>x.status!=="Closed").length;
- document.getElementById("overall").textContent=act+"%";document.getElementById("planned").textContent=plan+"%";document.getElementById("variance").textContent=(act-plan>0?"+":"")+(act-plan)+"%";document.getElementById("openIssues").textContent=open;
- document.getElementById("chart").innerHTML=["W1","W2","W3","W4","Current"].map((w,i)=>{let p=[24,36,48,60,plan][i],a=[20,31,43,54,act][i];return `<div class="barwrap"><div class="bar" style="height:${p}%"></div><div class="bar actual" style="height:${a}%"></div><span class="barlabel">${w}</span></div>`}).join("");
- let streams=[["Solar PV",all.filter(x=>x.area==="Solar PV")],["BESS",all.filter(x=>x.area==="BESS")]];
- document.getElementById("workstreams").innerHTML=streams.map(([n,a])=>`<div class="progressrow"><div class="rowtop"><b>${n}</b><b>${avg(a.map(x=>({v:pct(x)})),"v")}%</b></div><div class="track"><div class="fill" style="width:${avg(a.map(x=>({v:pct(x)})),"v")}%"></div></div></div>`).join("");
- document.getElementById("priorityRows").innerHTML=all.slice().sort((a,b)=>(pct(a)-a.plan)-(pct(b)-b.plan)).slice(0,6).map(a=>`<tr><td>${esc(a.name)}</td><td>${esc(a.discipline)}</td><td>${a.plan}%</td><td>${pct(a)}%</td><td>${pct(a)-a.plan}%</td><td><span class="${status(a)[1]}">${status(a)[0]}</span></td></tr>`).join("");
- ["Mechanical","Electrical"].forEach(d=>{let el=document.getElementById(d==="Mechanical"?"solarMechanical":"solarElectrical"),arr=all.filter(x=>x.area==="Solar PV"&&x.discipline===d);el.innerHTML=arr.map(a=>prog(a)).join("")});
- document.getElementById("solarRows").innerHTML=all.filter(x=>x.area==="Solar PV").map(activityRow).join("");
- document.getElementById("bessRows").innerHTML=all.filter(x=>x.area==="BESS").map(a=>`<tr><td>${esc(a.name)}</td><td>${a.unit}</td><td>${a.planned}</td><td>${a.actual}</td><td>${pct(a)}%</td><td><button class="secondary" onclick="editActivity(${a.id})">Edit</button></td></tr>`).join("");
- document.getElementById("bessCards").innerHTML=Array.from({length:6},(_,i)=>{let a=all.find(x=>x.name==="Battery Container Installation");let n=i+1;return `<div class="card"><div class="kpi-label">BESS BLOCK ${n}</div><div class="kpi">${n<= (a?.actual||0)?"Installed":"Pending"}</div><div class="kpi-note">Container installation status · update actual register</div></div>`}).join("");
- document.getElementById("dailyCount").textContent=data.updates.filter(x=>x.period==="Daily").length;document.getElementById("weeklyCount").textContent=data.updates.filter(x=>x.period==="Weekly").length;document.getElementById("monthlyCount").textContent=data.updates.filter(x=>x.period==="Monthly").length;
- document.getElementById("updateRows").innerHTML=data.updates.slice().reverse().map(x=>`<tr><td>${x.date}</td><td>${x.period}</td><td>${esc(x.activity)}</td><td>${x.qty}</td><td>${esc(x.notes)}</td><td>${esc(x.by)}</td></tr>`).join("")||empty(6);
- renderRecords();
-}
-function prog(a){return `<div class="progressrow"><div class="rowtop"><span>${esc(a.name)}</span><b>${pct(a)}%</b></div><div class="track"><div class="fill" style="width:${pct(a)}%"></div></div></div>`}
-function activityRow(a){return `<tr><td>${esc(a.name)}</td><td>${a.discipline}</td><td>${a.unit}</td><td>${a.planned}</td><td>${a.actual}</td><td>${pct(a)}%</td><td><button class="secondary" onclick="editActivity(${a.id})">Edit</button></td></tr>`}
-function empty(n){return `<tr><td colspan="${n}" class="empty">No records yet</td></tr>`}
-function renderRecords(){
- let q=data.qaqc;document.getElementById("qaqcKpis").innerHTML=[["Total Records",q.length],["Approved",q.filter(x=>x.status==="Approved").length],["Pending",q.filter(x=>x.status==="Pending").length]].map(x=>`<div class="card"><div class="kpi-label">${x[0]}</div><div class="kpi">${x[1]}</div></div>`).join("");
- document.getElementById("qaqcRows").innerHTML=q.map(x=>`<tr><td>${esc(x.ref)}</td><td>${esc(x.type)}</td><td>${esc(x.desc)}</td><td>${x.date}</td><td><span class="pill ${x.status==="Rejected"?"bad":x.status==="Pending"?"warn":""}">${x.status}</span></td><td>${esc(x.owner)}</td></tr>`).join("")||empty(6);
- let h=data.hse;document.getElementById("hseKpis").innerHTML=[["Records",h.length],["Open Actions",h.filter(x=>x.status!=="Closed").length],["Incidents",h.filter(x=>x.category==="Incident").length]].map(x=>`<div class="card"><div class="kpi-label">${x[0]}</div><div class="kpi">${x[1]}</div></div>`).join("");
- document.getElementById("hseRows").innerHTML=h.map(x=>`<tr><td>${x.date}</td><td>${x.category}</td><td>${esc(x.desc)}</td><td>${x.severity}</td><td>${x.status}</td><td>${esc(x.owner)}</td></tr>`).join("")||empty(6);
- let m=data.manpower;document.getElementById("resourceKpis").innerHTML=[["Latest Workforce",m.length?m[m.length-1].engineers+m[m.length-1].technicians+m[m.length-1].workers:0],["Equipment Available",m.length?m[m.length-1].equipment:0],["Snapshots",m.length]].map(x=>`<div class="card"><div class="kpi-label">${x[0]}</div><div class="kpi">${x[1]}</div></div>`).join("");
- document.getElementById("resourceRows").innerHTML=m.map(x=>`<tr><td>${x.date}</td><td>${x.engineers}</td><td>${x.technicians}</td><td>${x.workers}</td><td>${x.equipment}</td><td>${esc(x.notes)}</td></tr>`).join("")||empty(6);
- document.getElementById("issueRows").innerHTML=data.issues.map((x,i)=>`<tr><td>ISS-${String(i+1).padStart(3,"0")}</td><td>${esc(x.title)}</td><td>${x.category}</td><td><span class="pill ${x.priority==="High"?"bad":x.priority==="Medium"?"warn":""}">${x.priority}</span></td><td>${x.due}</td><td>${esc(x.owner)}</td><td>${x.status}</td><td><button class="secondary" onclick="closeIssue(${i})">${x.status==="Closed"?"Reopen":"Close"}</button></td></tr>`).join("")||empty(8);
-}
-function nav(page){document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));document.getElementById(page).classList.add("active");document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.page===page));let title=page==="overview"?"Project Overview":({solar:"Solar PV Progress",bess:"BESS Progress",schedule:"Schedule & Planning",qaqc:"QA/QC Register",hse:"HSE Register",manpower:"Manpower & Equipment",issues:"Issues & Risks",reports:"Reports & Data"})[page];document.getElementById("topTitle").textContent=title;document.getElementById("crumb").textContent=page.toUpperCase()}
-document.getElementById("nav").addEventListener("click",e=>{let b=e.target.closest("button[data-page]");if(b)nav(b.dataset.page)});
-document.getElementById("roleSelect").addEventListener("change",e=>{document.getElementById("userRole").textContent=e.target.value;document.getElementById("userName").textContent=e.target.value==="Manager"?"Project Manager":e.target.value==="Viewer"?"Management Viewer":"Site Engineer";document.getElementById("avatar").textContent=e.target.value==="Manager"?"PM":e.target.value==="Viewer"?"MV":"SE"});
-function modal(title,body){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=body;document.getElementById("modal").classList.add("open")}
-function closeModal(){document.getElementById("modal").classList.remove("open")}
-function openUpdate(){modal("Log Progress Update",`<form onsubmit="addUpdate(event)"><div class="formgrid"><div class="field"><label>Activity</label><select name="id">${data.activities.map(a=>`<option value="${a.id}">${esc(a.name)}</option>`).join("")}</select></div><div class="field"><label>Reporting period</label><select name="period"><option>Daily</option><option>Weekly</option><option>Monthly</option></select></div><div class="field"><label>Quantity completed in this period</label><input name="qty" type="number" min="0" step="any" required></div><div class="field"><label>Update date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}" required></div></div><div class="field"><label>Notes / site observations</label><textarea name="notes"></textarea></div><div class="field"><label>Updated by</label><input name="by" value="${esc(document.getElementById("userName").textContent)}"></div><button>Save Update</button></form>`)}
-function addUpdate(e){e.preventDefault();let f=new FormData(e.target),a=data.activities.find(x=>x.id==f.get("id")),q=Number(f.get("qty"));a.actual+=q;data.updates.push({date:f.get("date"),period:f.get("period"),activity:a.name,qty:q,notes:f.get("notes"),by:f.get("by")});closeModal();save();nav("schedule")}
-function openActivity(area){modal("Add "+area+" Activity",`<form onsubmit="addActivity(event,'${area}')"><div class="field"><label>Activity name</label><input name="name" required></div><div class="formgrid"><div class="field"><label>Discipline</label><select name="discipline"><option>Mechanical</option><option>Electrical</option><option>QA/QC</option><option>Commissioning</option></select></div><div class="field"><label>Unit</label><input name="unit" placeholder="e.g. Units, Meters, Modules" required></div><div class="field"><label>Planned quantity</label><input name="planned" type="number" min="1" required></div><div class="field"><label>Installed quantity</label><input name="actual" type="number" min="0" value="0" required></div><div class="field"><label>Planned progress (%)</label><input name="plan" type="number" min="0" max="100" value="0"></div></div><button>Add Activity</button></form>`)}
-function addActivity(e,area){e.preventDefault();let f=new FormData(e.target);data.activities.push({id:Date.now(),area,name:f.get("name"),discipline:f.get("discipline"),unit:f.get("unit"),planned:+f.get("planned"),actual:+f.get("actual"),plan:+f.get("plan")});closeModal();save()}
-function editActivity(id){let a=data.activities.find(x=>x.id===id);modal("Update Activity Quantities",`<form onsubmit="saveActivity(event,${id})"><div class="field"><label>Activity</label><input value="${esc(a.name)}" disabled></div><div class="formgrid"><div class="field"><label>Planned quantity</label><input name="planned" type="number" min="1" value="${a.planned}" required></div><div class="field"><label>Installed quantity</label><input name="actual" type="number" min="0" value="${a.actual}" required></div><div class="field"><label>Planned progress (%)</label><input name="plan" type="number" min="0" max="100" value="${a.plan}"></div></div><button>Save Changes</button></form>`)}
-function saveActivity(e,id){e.preventDefault();let f=new FormData(e.target),a=data.activities.find(x=>x.id===id);a.planned=+f.get("planned");a.actual=+f.get("actual");a.plan=+f.get("plan");closeModal();save()}
-function openRecord(type){let cfg={
-qaqc:{title:"Add QA/QC Record",fields:`<div class="field"><label>Reference</label><input name="ref" required placeholder="IR / ITR / NCR reference"></div><div class="field"><label>Type</label><select name="type"><option>IR</option><option>ITR</option><option>WIR</option><option>NCR</option><option>Test Report</option></select></div><div class="field"><label>Description</label><input name="desc" required></div><div class="field"><label>Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Status</label><select name="status"><option>Pending</option><option>Approved</option><option>Rejected</option><option>Closed</option></select></div><div class="field"><label>Owner</label><input name="owner"></div>`},
-hse:{title:"Add HSE Record",fields:`<div class="field"><label>Category</label><select name="category"><option>Safety Observation</option><option>Toolbox Talk</option><option>Incident</option><option>Inspection</option></select></div><div class="field"><label>Description</label><input name="desc" required></div><div class="field"><label>Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>Severity</label><select name="severity"><option>Low</option><option>Medium</option><option>High</option><option>Not Applicable</option></select></div><div class="field"><label>Status</label><select name="status"><option>Open</option><option>In Progress</option><option>Closed</option></select></div><div class="field"><label>Owner</label><input name="owner"></div>`},
-manpower:{title:"Add Manpower Snapshot",fields:`<div class="field"><label>Date</label><input name="date" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="formgrid"><div class="field"><label>Engineers</label><input name="engineers" type="number" min="0" value="0"></div><div class="field"><label>Technicians</label><input name="technicians" type="number" min="0" value="0"></div><div class="field"><label>Workers</label><input name="workers" type="number" min="0" value="0"></div><div class="field"><label>Equipment available</label><input name="equipment" type="number" min="0" value="0"></div></div><div class="field"><label>Notes</label><input name="notes"></div>`},
-issues:{title:"Add Project Issue",fields:`<div class="field"><label>Issue / constraint</label><input name="title" required></div><div class="field"><label>Category</label><select name="category"><option>Materials</option><option>Technical</option><option>Manpower</option><option>Logistics</option><option>Access</option><option>Weather</option><option>Other</option></select></div><div class="field"><label>Priority</label><select name="priority"><option>Low</option><option>Medium</option><option>High</option></select></div><div class="field"><label>Due date</label><input name="due" type="date"></div><div class="field"><label>Owner</label><input name="owner"></div><div class="field"><label>Status</label><select name="status"><option>Open</option><option>In Progress</option><option>Closed</option></select></div>`}
-}[type];modal(cfg.title,`<form onsubmit="saveRecord(event,'${type}')">${cfg.fields}<button>Save Record</button></form>`)}
-function saveRecord(e,type){e.preventDefault();let f=new FormData(e.target),o=Object.fromEntries(f.entries());Object.keys(o).forEach(k=>{if(["engineers","technicians","workers","equipment"].includes(k))o[k]=+o[k]});data[type].push(o);closeModal();save()}
-function closeIssue(i){data.issues[i].status=data.issues[i].status==="Closed"?"Open":"Closed";save()}
-function exportCSV(){let rows=[["Area","Activity","Discipline","Unit","Planned Qty","Actual Qty","Progress %","Planned %","Status"],...data.activities.map(a=>[a.area,a.name,a.discipline,a.unit,a.planned,a.actual,pct(a),a.plan,status(a)[0]])];download("project-activities.csv",rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(",")).join("\n"),"text/csv")}
-function backup(){download("greengrid-project-backup.json",JSON.stringify(data,null,2),"application/json")}
-function restore(e){let file=e.target.files[0];if(!file)return;let r=new FileReader();r.onload=()=>{try{let x=JSON.parse(r.result);if(!x.activities||!x.settings)throw Error();data=x;save();alert("Backup restored.")}catch(err){alert("Invalid backup file.")}};r.readAsText(file)}
-function download(name,content,type){let a=document.createElement("a"),u=URL.createObjectURL(new Blob([content],{type}));a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
-function saveSettings(){data.settings={name:document.getElementById("projectName").value,pv:+document.getElementById("pvCapacity").value,bess:+document.getElementById("bessCapacity").value};save();alert("Settings saved.")}
-function generateReport(){let period=document.getElementById("reportPeriod").value;let lines=data.activities.map(a=>`<tr><td>${esc(a.name)}</td><td>${a.area}</td><td>${pct(a)}%</td><td>${a.plan}%</td><td>${status(a)[0]}</td></tr>`).join("");document.getElementById("reportPreview").innerHTML=`<div class="notice">${period} report · ${new Date().toLocaleDateString()} · ${esc(data.settings.name)}</div><h3>Executive Summary</h3><p>Overall physical progress: <b>${overall()}%</b>. Planned progress: <b>${avg(data.activities,"plan")}%</b>. Open issues: <b>${data.issues.filter(x=>x.status!=="Closed").length}</b>.</p><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Area</th><th>Actual</th><th>Planned</th><th>Status</th></tr></thead><tbody>${lines}</tbody></table></div>`}
-render();
-</script></body></html>
+
+<div class="modal" id="modal"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle">Add Record</h2><button class="close" data-action="close-modal" type="button">✕</button></div><div id="modalBody"></div></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
