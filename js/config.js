@@ -12,4 +12,4 @@
 // database decides what each signed-in user can read and write.
 
 export const SUPABASE_URL = "https://zxmxjsfeboalahjslgcl.supabase.co";
-export const SUPABASE_ANON_KEY = "YOUR-PUBLISHABLE-OR-ANON-KEY";
+export const SUPABASE_ANON_KEY = "sb_publishable_8wqdn499bNmxT7RcWsJzbA_wqFa32At";
