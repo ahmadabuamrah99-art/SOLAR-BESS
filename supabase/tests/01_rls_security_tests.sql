@@ -323,6 +323,29 @@ select rls_test.assert_eq('T85 overall null with mixed basis',
     where project_id = '11111111-1111-4111-8111-111111111111'), 'NULL');
 
 -- ---------------------------------------------------------------------
+-- Last-Admin protection (runs last: admin A is the only active Admin here)
+-- ---------------------------------------------------------------------
+select rls_test.expect_denied('T90 last admin cannot demote self',
+  $$update public.profiles set role = 'viewer' where id = '00000000-0000-0000-0000-000000000001'$$);
+select rls_test.expect_denied('T91 last admin cannot deactivate self',
+  $$update public.profiles set is_active = false where id = '00000000-0000-0000-0000-000000000001'$$);
+select rls_test.expect_rows('T92 admin promotes engineer to admin',
+  $$update public.profiles set role = 'admin' where id = '00000000-0000-0000-0000-000000000002'$$, 1);
+select rls_test.expect_rows('T93 admin may demote self when another active admin exists',
+  $$update public.profiles set role = 'viewer' where id = '00000000-0000-0000-0000-000000000001'$$, 1);
+
+select rls_test.as_user('00000000-0000-0000-0000-000000000002');
+select rls_test.expect_denied('T94 new last admin cannot demote self',
+  $$update public.profiles set role = 'engineer' where id = '00000000-0000-0000-0000-000000000002'$$);
+
+-- Same rule on the SQL-editor / postgres path (the invariant lives in the database).
+select rls_test.as_postgres();
+select rls_test.expect_denied('T95 last admin cannot be deactivated via SQL path',
+  $$update public.profiles set is_active = false where id = '00000000-0000-0000-0000-000000000002'$$);
+select rls_test.expect_denied('T96 last admin profile cannot be removed by auth.users delete',
+  $$delete from auth.users where id = '00000000-0000-0000-0000-000000000002'$$);
+
+-- ---------------------------------------------------------------------
 -- Cleanup: discard all test data and helpers
 -- ---------------------------------------------------------------------
 select rls_test.as_postgres();

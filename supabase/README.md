@@ -13,10 +13,11 @@ Phase 1 covers the database only. The frontend, the Vercel deployment and the pr
 | `migrations/20261125100003_rls_and_grants.sql` | RLS on every table, policies, grants (anon has no access) |
 | `migrations/20261125100004_workflow_audit.sql` | QA/QC approval workflow, report issue lock, ownership protection, audit log |
 | `migrations/20261125100005_progress_views.sql` | Progress views (per activity, by discipline, weighted overall) |
+| `migrations/20261125100006_last_admin_guard.sql` | Database rule: at least one active Admin must always remain (applies to every path, including the SQL editor) |
 | `seed/demo_seed.sql` | **Optional.** Prototype sample data, flagged `is_demo = true`. Not run automatically. |
 | `seed/demo_cleanup.sql` | Preview and delete demo rows only. **Do not run until you approve.** |
 | `tests/00_local_auth_shim.sql` | **Local Postgres only.** Imitates Supabase's `auth` schema and roles. Never run on Supabase. |
-| `tests/01_rls_security_tests.sql` | 62 RLS, workflow and calculation checks. Runs in one transaction and rolls back. |
+| `tests/01_rls_security_tests.sql` | 69 RLS, workflow, last-Admin and calculation checks. Runs in one transaction and rolls back. |
 
 ## Roles and permissions
 
@@ -55,6 +56,7 @@ Use the **existing** Supabase project. Do not create a second one.
    3. `migrations/20261125100003_rls_and_grants.sql`
    4. `migrations/20261125100004_workflow_audit.sql`
    5. `migrations/20261125100005_progress_views.sql`
+   6. `migrations/20261125100006_last_admin_guard.sql`
 3. Do **not** run `seed/demo_seed.sql` yet. Run it only when you want the prototype data loaded as DEMO DATA.
 
 ### Option B: Supabase CLI (from your computer)
@@ -114,12 +116,13 @@ psql "<local-connection-string>" -v ON_ERROR_STOP=1 -f supabase/migrations/20261
 psql "<local-connection-string>" -v ON_ERROR_STOP=1 -f supabase/migrations/20261125100003_rls_and_grants.sql
 psql "<local-connection-string>" -v ON_ERROR_STOP=1 -f supabase/migrations/20261125100004_workflow_audit.sql
 psql "<local-connection-string>" -v ON_ERROR_STOP=1 -f supabase/migrations/20261125100005_progress_views.sql
+psql "<local-connection-string>" -v ON_ERROR_STOP=1 -f supabase/migrations/20261125100006_last_admin_guard.sql
 psql "<local-connection-string>" -v ON_ERROR_STOP=1 -f supabase/tests/01_rls_security_tests.sql
 ```
 
 A passing run prints `PASS` lines and no `FAIL`. Any `FAIL` stops the run with the name of the check.
 
-**Status:** I ran these files on PostgreSQL 16 locally. All 62 checks passed. I also confirmed the suite catches a broken guard: with the role-change trigger disabled, check T24 failed. I have **not** run them on a real Supabase instance. Supabase's `auth.users` may have extra required columns, so a first run there may need a small change to the fixture inserts.
+**Status:** I ran these files on PostgreSQL 16 locally. All 69 checks passed. I also confirmed the suite catches a broken guard: with the role-change trigger disabled, check T24 failed. I have **not** run them on a real Supabase instance. Supabase's `auth.users` may have extra required columns, so a first run there may need a small change to the fixture inserts.
 
 ## Environment variables
 
@@ -145,11 +148,11 @@ These are choices I made in the schema. Please review them before we build the f
 5. **Profiles are readable by all active users.** The table holds only name, role and status. Email stays in Supabase Auth.
 6. **Opening quantities** carry over the prototype's "installed" numbers, so history is not lost. Installed quantity = opening + sum of logged entries.
 7. **No overall percentage without verified weights.** `project_progress_overview.weighted_overall_pct` stays NULL until every activity has a weight on the same basis (Budget or Man-hours).
-8. **Demo data** is flagged `is_demo`. Capacities are NULL: the 232 MW / 526 MWh figures are not carried over.
+8. **Last Admin:** the database always keeps at least one active Admin. Demoting, deactivating or deleting the last one is rejected, even from the SQL editor. To retire an Admin, promote a replacement first.
+9. **Demo data** is flagged `is_demo`. Capacities are NULL: the 232 MW / 526 MWh figures are not carried over.
 
 ## Known gaps (for later phases)
 
-- **Last Admin protection:** nothing yet stops an Admin from demoting the last Admin. I will add this if you want it.
 - **Audit log retention:** no cleanup policy yet.
 - **Engineer edits to QA/QC after submission:** locked by design. If a submitted record needs a correction, the Engineer withdraws it to Draft first.
 - **Attachments** (photos, inspection PDFs): not in Phase 1.
