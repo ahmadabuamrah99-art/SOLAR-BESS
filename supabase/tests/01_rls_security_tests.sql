@@ -18,7 +18,7 @@ begin;
 -- Test helpers (live in a temporary schema that is dropped at the end)
 -- ---------------------------------------------------------------------
 create schema rls_test;
-grant usage on schema rls_test to anon, authenticated;
+grant usage on schema rls_test to anon, authenticated, service_role;
 
 -- Act as a signed-in user, as PostgREST/Supabase does for a JWT with this sub.
 create function rls_test.as_user(p_uid uuid) returns void
@@ -43,6 +43,14 @@ begin
   perform set_config('request.jwt.claims', '', true);
 end $$;
 
+-- The Edge Function's role (bypasses RLS, used for rate-limit storage).
+create function rls_test.as_service() returns void
+language plpgsql as $$
+begin
+  execute 'reset role';
+  execute 'set local role service_role';
+end $$;
+
 -- Statement must be DENIED (privilege, RLS, workflow or check constraint).
 create function rls_test.expect_denied(p_label text, p_sql text) returns void
 language plpgsql as $$
@@ -52,7 +60,7 @@ begin
   begin
     execute p_sql;
     allowed := true;
-  exception when sqlstate '42501' or sqlstate 'P0001' or sqlstate '23514' then
+  exception when sqlstate '42501' or sqlstate 'P0001' or sqlstate '23514' or sqlstate '23505' then
     raise notice 'PASS %: denied (%)', p_label, sqlerrm;
     return;
   end;
@@ -84,7 +92,7 @@ begin
   raise notice 'PASS %: %', p_label, p_actual;
 end $$;
 
-grant execute on all functions in schema rls_test to anon, authenticated;
+grant execute on all functions in schema rls_test to anon, authenticated, service_role;
 
 -- ---------------------------------------------------------------------
 -- Fixtures (as postgres: bypasses RLS and workflow guards on purpose)
@@ -344,6 +352,69 @@ select rls_test.expect_denied('T95 last admin cannot be deactivated via SQL path
   $$update public.profiles set is_active = false where id = '00000000-0000-0000-0000-000000000002'$$);
 select rls_test.expect_denied('T96 last admin profile cannot be removed by auth.users delete',
   $$delete from auth.users where id = '00000000-0000-0000-0000-000000000002'$$);
+
+-- ---------------------------------------------------------------------
+-- Username support (migration 20261126100007). Admin here: E (...02).
+-- ---------------------------------------------------------------------
+select rls_test.as_postgres();
+update auth.users set encrypted_password = 'test-hash-admin' where id = '00000000-0000-0000-0000-000000000001';
+create table rls_test.pw_before as
+  select encrypted_password from auth.users where id = '00000000-0000-0000-0000-000000000001';
+
+select rls_test.as_user('00000000-0000-0000-0000-000000000003');
+select rls_test.expect_denied('U01 engineer cannot set own username',
+  $$update public.profiles set username = 'eng_self' where id = '00000000-0000-0000-0000-000000000003'$$);
+
+select rls_test.as_user('00000000-0000-0000-0000-000000000001');
+select rls_test.expect_denied('U02 viewer cannot set own username',
+  $$update public.profiles set username = 'viewer_self' where id = '00000000-0000-0000-0000-000000000001'$$);
+
+select rls_test.as_user('00000000-0000-0000-0000-000000000002');
+select rls_test.expect_rows('U03 admin sets username baomahun_soventix',
+  $$update public.profiles set username = 'baomahun_soventix' where id = '00000000-0000-0000-0000-000000000001'$$, 1);
+select rls_test.expect_denied('U04 uppercase username rejected',
+  $$update public.profiles set username = 'Engineer_One' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_denied('U05 username shorter than 3 characters rejected',
+  $$update public.profiles set username = 'ab' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_denied('U06 username starting with a digit rejected',
+  $$update public.profiles set username = '1engineer' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_denied('U07 username with a space rejected',
+  $$update public.profiles set username = 'eng one' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_denied('U08 username longer than 30 characters rejected',
+  $$update public.profiles set username = 'a_very_long_username_that_is_too_long' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_denied('U09 duplicate username rejected (unique)',
+  $$update public.profiles set username = 'baomahun_soventix' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_rows('U10 admin sets a second, different username',
+  $$update public.profiles set username = 'engineer_one' where id = '00000000-0000-0000-0000-000000000003'$$, 1);
+select rls_test.assert_eq('U11 admin role unchanged after username change',
+  (select role from public.profiles where id = '00000000-0000-0000-0000-000000000002'), 'admin');
+
+-- Rate-limit table: no access for clients at all.
+select rls_test.as_user('00000000-0000-0000-0000-000000000002');
+select rls_test.expect_denied('U12 signed-in admin cannot read login attempts',
+  $$select count(*) from public.auth_login_attempts$$);
+select rls_test.expect_denied('U13 signed-in admin cannot write login attempts',
+  $$insert into public.auth_login_attempts (key_hash) values (repeat('a', 64))$$);
+select rls_test.as_anon();
+select rls_test.expect_denied('U14 anonymous cannot read login attempts',
+  $$select count(*) from public.auth_login_attempts$$);
+
+-- The Edge Function's role can read, write and clear its own records.
+select rls_test.as_service();
+select rls_test.expect_rows('U15 service role records a failure',
+  $$insert into public.auth_login_attempts (key_hash) values (repeat('b', 64))$$, 1);
+select rls_test.assert_eq('U16 service role counts the failure',
+  (select count(*)::text from public.auth_login_attempts where key_hash = repeat('b', 64)), '1');
+select rls_test.expect_rows('U17 service role clears a username counter',
+  $$delete from public.auth_login_attempts where key_hash = repeat('b', 64)$$, 1);
+
+-- Username visible to other signed-in users (for display), password hash untouched.
+select rls_test.as_user('00000000-0000-0000-0000-000000000003');
+select rls_test.assert_eq('U18 signed-in user can read usernames',
+  (select count(*)::text from public.profiles where username = 'baomahun_soventix'), '1');
+select rls_test.as_postgres();
+select rls_test.assert_eq('U19 password hash unchanged by username change',
+  (select (encrypted_password = 'test-hash-admin')::text from auth.users where id = '00000000-0000-0000-0000-000000000001'), 'true');
 
 -- ---------------------------------------------------------------------
 -- Cleanup: discard all test data and helpers

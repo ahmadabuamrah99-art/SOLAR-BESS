@@ -62,7 +62,7 @@
     <h1>Sign in to GreenGrid</h1>
     <p class="sub">Solar PV & BESS Project Control</p>
     <form id="loginForm" novalidate>
-      <div class="field"><label for="loginEmail">Email</label><input id="loginEmail" name="email" type="email" autocomplete="username" required></div>
+      <div class="field"><label for="loginIdentifier">Email or username</label><input id="loginIdentifier" name="identifier" type="text" autocomplete="username" placeholder="name@company.com or username" required></div>
       <div class="field"><label for="loginPassword">Password</label><input id="loginPassword" name="password" type="password" autocomplete="current-password" required></div>
       <button type="submit">Sign in</button>
       <div class="msg" id="loginMsg"></div>
@@ -227,7 +227,7 @@
     <div class="tablewrap"><table><thead><tr><th>Title</th><th>Period</th><th>Status</th><th>Action</th></tr></thead><tbody id="savedReportRows"></tbody></table></div>
    </div>
   </div>
-  <div class="card" style="margin-top:16px" data-admin><h2>User Access</h2><p class="kpi-note">Roles change here. New accounts are invited in the Supabase Dashboard (Authentication → Users). The database keeps at least one active Admin.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Role</th><th>Active</th></tr></thead><tbody id="usersRows"></tbody></table></div></div>
+  <div class="card" style="margin-top:16px" data-admin><h2>User Access</h2><p class="kpi-note">Roles change here. New accounts are invited in the Supabase Dashboard (Authentication → Users). The database keeps at least one active Admin.</p><div class="tablewrap"><table><thead><tr><th>Name</th><th>Username</th><th>Role</th><th>Active</th></tr></thead><tbody id="usersRows"></tbody></table></div></div>
  </section>
 
  </div></main></div>

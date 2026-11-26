@@ -126,7 +126,7 @@ let sb;
 
 async function loadAll() {
   // Profiles load first: admins need the user list even before a project exists.
-  const { data: profs, error: profErr } = await sb.from("profiles").select("id,full_name,role,is_active").order("full_name");
+  const { data: profs, error: profErr } = await sb.from("profiles").select("id,full_name,role,is_active,username").order("full_name");
   if (profErr) { toast(friendly(profErr), true); return; }
   state.profiles = profs ?? [];
   state.names = Object.fromEntries(state.profiles.map((p) => [p.id, p.full_name || "(no name)"]));
@@ -393,8 +393,8 @@ function renderSettings() {
 
 function renderUsers() {
   if (!isAdmin()) { $("usersRows").innerHTML = ""; return; }
-  $("usersRows").innerHTML = state.profiles.map((p) => `<tr><td>${esc(p.full_name || "(no name)")}${p.id === state.user?.id ? " (you)" : ""}</td><td><select data-action="user-role" data-id="${esc(p.id)}">${["admin", "engineer", "viewer"].map((r) => `<option value="${r}" ${r === p.role ? "selected" : ""}>${ROLE_LABEL[r]}</option>`).join("")}</select></td><td><input type="checkbox" data-action="user-active" data-id="${esc(p.id)}" ${p.is_active ? "checked" : ""} aria-label="Active"></td></tr>`).join("")
-    || empty(3, "No users yet");
+  $("usersRows").innerHTML = state.profiles.map((p) => `<tr><td>${esc(p.full_name || "(no name)")}${p.id === state.user?.id ? " (you)" : ""}</td><td><input data-action="user-username" data-id="${esc(p.id)}" value="${esc(p.username || "")}" maxlength="30" placeholder="not set" aria-label="Username for ${esc(p.full_name || "user")}" style="min-width:160px;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></td><td><select data-action="user-role" data-id="${esc(p.id)}">${["admin", "engineer", "viewer"].map((r) => `<option value="${r}" ${r === p.role ? "selected" : ""}>${ROLE_LABEL[r]}</option>`).join("")}</select></td><td><input type="checkbox" data-action="user-active" data-id="${esc(p.id)}" ${p.is_active ? "checked" : ""} aria-label="Active"></td></tr>`).join("")
+    || empty(4, "No users yet");
 }
 
 // ---------------------------------------------------------------------
@@ -853,6 +853,24 @@ document.addEventListener("change", async (e) => {
   if (action === "user-role") {
     return save(sb.from("profiles").update({ role: el.value }).eq("id", id), "Role updated");
   }
+  if (action === "user-username") {
+    const current = state.profiles.find((p) => p.id === id)?.username ?? "";
+    const value = el.value.trim().toLowerCase();
+    if (value && !/^[a-z][a-z0-9_]{2,29}$/.test(value)) {
+      toast("Username: 3 to 30 letters, digits or underscores, starting with a letter.", true);
+      el.value = current;
+      return;
+    }
+    if (value === current) return;
+    const { error } = await sb.from("profiles").update({ username: value || null }).eq("id", id);
+    if (error) {
+      toast(error.code === "23505" ? "That username is already taken." : friendly(error), true);
+      el.value = current;
+      return;
+    }
+    toast(value ? "Username saved" : "Username removed");
+    return loadAll();
+  }
   if (action === "user-active") {
     return save(sb.from("profiles").update({ is_active: el.checked }).eq("id", id), el.checked ? "User activated" : "User deactivated");
   }
@@ -914,6 +932,33 @@ function linkErrorCode() {
   return h.get("error_code") || q.get("error_code") || "";
 }
 
+// Username sign-in goes through the login-with-username Edge Function.
+// The browser sends only the public anon key. It never holds a service-role key.
+const LOGIN_FUNCTION_PATH = "/functions/v1/login-with-username";
+async function signInWithUsername(identifier, password) {
+  let res;
+  try {
+    res = await fetch(SUPABASE_URL + LOGIN_FUNCTION_PATH, {
+      method: "POST",
+      headers: { "content-type": "application/json", apikey: SUPABASE_ANON_KEY },
+      body: JSON.stringify({ identifier, password }),
+    });
+  } catch {
+    return { ok: false, reason: "unavailable" };
+  }
+  if (res.status === 429) return { ok: false, reason: "too_many" };
+  if (res.status === 400 || res.status === 401) return { ok: false, reason: "invalid" };
+  if (!res.ok) return { ok: false, reason: "unavailable" };
+
+  let body;
+  try { body = await res.json(); } catch { return { ok: false, reason: "unavailable" }; }
+  const s = body?.session;
+  if (!s?.access_token || !s?.refresh_token) return { ok: false, reason: "unavailable" };
+  // setSession triggers the normal SIGNED_IN flow, so roles and the dashboard load as usual.
+  const { error } = await sb.auth.setSession({ access_token: s.access_token, refresh_token: s.refresh_token });
+  return error ? { ok: false, reason: "unavailable" } : { ok: true };
+}
+
 async function enter(session) {
   const user = session.user;
   const { data: profile, error } = await sb.from("profiles").select("id,full_name,role,is_active").eq("id", user.id).maybeSingle();
@@ -943,14 +988,30 @@ function wireAuthForms() {
   $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    const email = String(fd.get("email") || "").trim();
+    const identifier = String(fd.get("identifier") || "").trim();
     const password = String(fd.get("password") || "");
-    if (!email || !password) return setMsg("loginMsg", "Enter your email and password.", "err");
+    if (!identifier || !password) return setMsg("loginMsg", "Enter your email or username and password.", "err");
     setMsg("loginMsg", "Signing in…");
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    // Same message for every failure, so the form does not reveal which emails exist.
-    setMsg("loginMsg", error ? "Email or password is not correct." : "", error ? "err" : "");
-    if (!error) clearRecoveryMarker(); // a normal sign-in must not be treated as recovery
+
+    if (identifier.includes("@")) {
+      // Email: standard Supabase sign-in, unchanged.
+      const { error } = await sb.auth.signInWithPassword({ email: identifier, password });
+      // Same message for every failure, so the form does not reveal which emails exist.
+      setMsg("loginMsg", error ? "Email or password is not correct." : "", error ? "err" : "");
+      if (!error) clearRecoveryMarker(); // a normal sign-in must not be treated as recovery
+    } else {
+      const result = await signInWithUsername(identifier, password);
+      if (result.ok) {
+        clearRecoveryMarker();
+        setMsg("loginMsg", "");
+      } else if (result.reason === "too_many") {
+        setMsg("loginMsg", "Too many sign-in attempts. Wait 15 minutes and try again.", "err");
+      } else if (result.reason === "unavailable") {
+        setMsg("loginMsg", "Sign-in is temporarily unavailable. Try again shortly.", "err");
+      } else {
+        setMsg("loginMsg", "Email or username or password is not correct.", "err");
+      }
+    }
     e.target.password.value = "";
   });
 
