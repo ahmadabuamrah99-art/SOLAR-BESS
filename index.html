@@ -12,6 +12,10 @@
 .auth-wrap{min-height:100vh;display:grid;place-items:center;background:var(--bg);padding:20px}
 .auth-card{width:min(420px,100%);background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px;box-shadow:var(--shadow)}
 .auth-card .logo{margin-bottom:14px}
+.login-logo{display:block;width:min(240px,100%);height:auto;margin:0 0 14px}
+.login-project{margin:0 0 16px}
+.login-project strong{display:block;font-size:15px;color:var(--ink)}
+.login-project span{display:block;font-size:12px;color:var(--muted);letter-spacing:.04em}
 .auth-card h1{font-size:22px;margin:0 0 4px;letter-spacing:-.02em}
 .auth-card form{margin-top:16px}
 .auth-card button[type=submit]{width:100%;margin-top:6px}
@@ -50,7 +54,11 @@
 <!-- Sign in -->
 <div id="viewLogin" class="auth-wrap hidden">
   <div class="auth-card">
-    <div class="logo">☀</div>
+    <img class="login-logo" src="assets/soventix-logo.webp" alt="Soventix – Powerful Returns" width="2000" height="667">
+    <div class="login-project">
+      <strong>Baomahun Solar PV Project</strong>
+      <span>Sierra Leone</span>
+    </div>
     <h1>Sign in to GreenGrid</h1>
     <p class="sub">Solar PV & BESS Project Control</p>
     <form id="loginForm" novalidate>
