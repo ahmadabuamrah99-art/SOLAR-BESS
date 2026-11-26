@@ -3,9 +3,9 @@
 // (the caller is not signed in yet, so JWT verification must be off for this function)
 //
 // Environment (set with `supabase secrets set`, never in the repository):
-//   LOGIN_HASH_PEPPER       random string, 32+ characters, used to hash rate-limit keys
-//   ALLOWED_ORIGINS         comma-separated exact origins, e.g. https://solar-bess-eight.vercel.app
-//   ALLOWED_ORIGIN_REGEX    optional regular expression for Preview origins
+//   LOGIN_HASH_PEPPER   random string, 32+ characters, used to hash rate-limit keys
+//   ALLOWED_ORIGINS     comma-separated EXACT origins, e.g. https://solar-bess-git-....vercel.app
+//                       No wildcards. Pattern matching is intentionally not supported.
 // Supabase provides SUPABASE_URL, SUPABASE_ANON_KEY and SUPABASE_SERVICE_ROLE_KEY automatically.
 // The service-role key is read here on the server only. It is never sent to the browser.
 
@@ -17,12 +17,16 @@ const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const PEPPER = Deno.env.get("LOGIN_HASH_PEPPER") ?? "";
 const ALLOWED = (Deno.env.get("ALLOWED_ORIGINS") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-const ORIGIN_RE_SRC = Deno.env.get("ALLOWED_ORIGIN_REGEX") ?? "";
 
 if (PEPPER.length < 32) throw new Error("LOGIN_HASH_PEPPER must be set to at least 32 characters");
-const ORIGIN_RE = ORIGIN_RE_SRC ? new RegExp(ORIGIN_RE_SRC) : null;
+if (ALLOWED.some((o) => o.includes("*"))) throw new Error("ALLOWED_ORIGINS must not contain wildcards");
+for (const o of ALLOWED) {
+  // Exact origins only: scheme and host, no path, no trailing slash.
+  if (!/^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(o)) throw new Error(`ALLOWED_ORIGINS entry is not an exact origin: ${o}`);
+}
 
-// Server-side client with the service role. Used only for profile lookup and rate-limit storage.
+// Server-side client with the service role. Used for profile lookup, the email lookup
+// and rate-limit storage. Never leaves the server.
 const admin = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 });
@@ -42,7 +46,7 @@ async function hmac(value: string): Promise<string> {
 }
 
 const deps: LoginDeps = {
-  originAllowed: (origin) => ALLOWED.includes(origin) || (ORIGIN_RE?.test(origin) ?? false),
+  originAllowed: (origin) => ALLOWED.includes(origin),
   hmac,
   countRecent: async (keyHash, sinceMs) => {
     const { count, error } = await admin
@@ -62,7 +66,6 @@ const deps: LoginDeps = {
     if (error) throw error;
   },
   findActiveEmail: async (username) => {
-    // Lookup uses the normalized, lowercase username. The column only stores lowercase names.
     const { data, error } = await admin
       .from("profiles")
       .select("id")
@@ -82,16 +85,23 @@ const deps: LoginDeps = {
   },
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
   clientIp: (req) => {
-    const fwd = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim();
-    return fwd || req.headers.get("x-real-ip") || "unknown";
+    // The client can set the first x-forwarded-for entry, so it is not trusted.
+    // The LAST entry is appended by the edge proxy in front of this function.
+    const xff = req.headers.get("x-forwarded-for");
+    if (xff) {
+      const parts = xff.split(",").map((s) => s.trim()).filter(Boolean);
+      if (parts.length) return parts[parts.length - 1];
+    }
+    return req.headers.get("x-real-ip") || "unknown";
   },
   now: () => Date.now(),
 };
 
 Deno.serve(async (req) => {
-  // Occasionally remove attempt records older than the window, to keep the table small.
+  // Occasionally remove attempt records older than the longest window, to keep the table small.
   if (Math.random() < 0.05) {
-    const cutoff = new Date(Date.now() - LIMITS.windowMs * 4).toISOString();
+    const longest = Math.max(LIMITS.pairWindowMs, LIMITS.ipWindowMs, LIMITS.userWindowMs);
+    const cutoff = new Date(Date.now() - longest * 2).toISOString();
     await admin.from("auth_login_attempts").delete().lt("attempted_at", cutoff);
   }
   return handleLogin(req, deps);

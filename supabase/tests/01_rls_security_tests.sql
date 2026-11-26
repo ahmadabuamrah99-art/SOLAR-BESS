@@ -372,8 +372,10 @@ select rls_test.expect_denied('U02 viewer cannot set own username',
 select rls_test.as_user('00000000-0000-0000-0000-000000000002');
 select rls_test.expect_rows('U03 admin sets username baomahun_soventix',
   $$update public.profiles set username = 'baomahun_soventix' where id = '00000000-0000-0000-0000-000000000001'$$, 1);
-select rls_test.expect_denied('U04 uppercase username rejected',
-  $$update public.profiles set username = 'Engineer_One' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_rows('U04 uppercase username is normalized to lowercase on write',
+  $$update public.profiles set username = '  Engineer_One ' where id = '00000000-0000-0000-0000-000000000003'$$, 1);
+select rls_test.assert_eq('U04b stored username is lowercase and trimmed',
+  (select username from public.profiles where id = '00000000-0000-0000-0000-000000000003'), 'engineer_one');
 select rls_test.expect_denied('U05 username shorter than 3 characters rejected',
   $$update public.profiles set username = 'ab' where id = '00000000-0000-0000-0000-000000000003'$$);
 select rls_test.expect_denied('U06 username starting with a digit rejected',
@@ -384,6 +386,8 @@ select rls_test.expect_denied('U08 username longer than 30 characters rejected',
   $$update public.profiles set username = 'a_very_long_username_that_is_too_long' where id = '00000000-0000-0000-0000-000000000003'$$);
 select rls_test.expect_denied('U09 duplicate username rejected (unique)',
   $$update public.profiles set username = 'baomahun_soventix' where id = '00000000-0000-0000-0000-000000000003'$$);
+select rls_test.expect_denied('U09b uppercase duplicate of an existing username rejected (case-insensitive)',
+  $$update public.profiles set username = 'BAOMAHUN_SOVENTIX' where id = '00000000-0000-0000-0000-000000000004'$$);
 select rls_test.expect_rows('U10 admin sets a second, different username',
   $$update public.profiles set username = 'engineer_one' where id = '00000000-0000-0000-0000-000000000003'$$, 1);
 select rls_test.assert_eq('U11 admin role unchanged after username change',

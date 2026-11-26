@@ -2,20 +2,33 @@
 // so it runs unchanged in Supabase Edge Functions (Deno) and in Node tests.
 //
 // Security properties:
-//   * The response never contains the account email.
-//   * Unknown usernames, wrong passwords, invalid formats and inactive accounts all
-//     return the same 401 body, after a small random delay.
-//   * Failed attempts are counted per username and per client IP (hashed keys),
-//     and requests are refused with 429 once a limit is reached.
+//   * The response never contains the account email or any session for a failed attempt.
+//   * Unknown usernames, wrong passwords, invalid formats and inactive accounts all return
+//     the same 401 body, after a small random delay.
+//   * Three independent counters limit guessing (see LIMITS below). None of them locks an
+//     account for everyone: the username+IP pair limit only affects the attacker's own
+//     address, so the Admin can still sign in from their own network.
+//   * Usernames are normalized (trimmed, lowercase) before every lookup.
 //   * Responses that contain a session are never cached.
 
 export const USERNAME_PATTERN = /^[a-z][a-z0-9_]{2,29}$/;
+
 export const LIMITS = {
-  userFailures: 5,       // failed attempts per username per window
-  ipFailures: 30,        // failed attempts per client IP per window
-  windowMs: 15 * 60 * 1000,
-  retryAfterSec: 900,
+  // Failed attempts for one username AND one IP address. Stops a single attacker.
+  pairFailures: 5,
+  pairWindowMs: 15 * 60 * 1000,
+  // Failed attempts from one IP address, across all usernames. Stops username sweeps.
+  ipFailures: 30,
+  ipWindowMs: 15 * 60 * 1000,
+  // Failed attempts for one username from any address. High ceiling against
+  // distributed guessing. Set high so it cannot be used to lock an account easily.
+  userFailures: 100,
+  userWindowMs: 60 * 60 * 1000,
+  retryAfterPairSec: 900,
+  retryAfterIpSec: 900,
+  retryAfterUserSec: 3600,
 };
+
 export const MAX_BODY_BYTES = 2048;
 
 export interface Session {
@@ -27,7 +40,7 @@ export interface Session {
 }
 
 export interface LoginDeps {
-  originAllowed(origin: string): boolean;
+  originAllowed(origin: string): boolean;               // exact match against the allow-list
   hmac(value: string): Promise<string>;                 // keyed hash, 64 hex characters
   countRecent(keyHash: string, sinceMs: number): Promise<number>;
   recordFailure(keyHashes: string[]): Promise<void>;
@@ -39,6 +52,7 @@ export interface LoginDeps {
   now(): number;
 }
 
+// The single normalization rule. Database trigger, UI and this function all match it.
 export function normalizeUsername(raw: string): string {
   return raw.trim().toLowerCase();
 }
@@ -102,20 +116,29 @@ export async function handleLogin(req: Request, deps: LoginDeps): Promise<Respon
       return json(400, { error: "use_email_sign_in" }, cors);
     }
 
-    // Rate limits are checked before any account lookup.
-    const userKey = await deps.hmac("user:" + username);
-    const ipKey = await deps.hmac("ip:" + deps.clientIp(req));
-    const since = deps.now() - LIMITS.windowMs;
-    const [userFailures, ipFailures] = await Promise.all([
-      deps.countRecent(userKey, since),
-      deps.countRecent(ipKey, since),
+    const ip = deps.clientIp(req);
+    const pairKey = await deps.hmac(`pair:${username}|${ip}`);
+    const ipKey = await deps.hmac(`ip:${ip}`);
+    const userKey = await deps.hmac(`user:${username}`);
+
+    const now = deps.now();
+    const [pairCount, ipCount, userCount] = await Promise.all([
+      deps.countRecent(pairKey, now - LIMITS.pairWindowMs),
+      deps.countRecent(ipKey, now - LIMITS.ipWindowMs),
+      deps.countRecent(userKey, now - LIMITS.userWindowMs),
     ]);
-    if (userFailures >= LIMITS.userFailures || ipFailures >= LIMITS.ipFailures) {
-      return json(429, { error: "too_many_attempts" }, { ...cors, "Retry-After": String(LIMITS.retryAfterSec) });
+    if (pairCount >= LIMITS.pairFailures) {
+      return json(429, { error: "too_many_attempts" }, { ...cors, "Retry-After": String(LIMITS.retryAfterPairSec) });
+    }
+    if (ipCount >= LIMITS.ipFailures) {
+      return json(429, { error: "too_many_attempts" }, { ...cors, "Retry-After": String(LIMITS.retryAfterIpSec) });
+    }
+    if (userCount >= LIMITS.userFailures) {
+      return json(429, { error: "too_many_attempts" }, { ...cors, "Retry-After": String(LIMITS.retryAfterUserSec) });
     }
 
     const reject = async (): Promise<Response> => {
-      await deps.recordFailure([userKey, ipKey]);
+      await deps.recordFailure([pairKey, ipKey, userKey]);
       await deps.sleep(150 + Math.floor(Math.random() * 150));
       return json(401, { error: "invalid_credentials" }, cors);
     };
@@ -128,7 +151,8 @@ export async function handleLogin(req: Request, deps: LoginDeps): Promise<Respon
     const session = await deps.signIn(email, password);
     if (!session) return reject();
 
-    await deps.clearFailures(userKey);
+    // A success clears only this attacker's own pair counter. Other counters are left alone.
+    await deps.clearFailures(pairKey);
     return json(200, {
       session: {
         access_token: session.access_token,

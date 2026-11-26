@@ -1000,7 +1000,8 @@ function wireAuthForms() {
       setMsg("loginMsg", error ? "Email or password is not correct." : "", error ? "err" : "");
       if (!error) clearRecoveryMarker(); // a normal sign-in must not be treated as recovery
     } else {
-      const result = await signInWithUsername(identifier, password);
+      // Same normalization as the database and the Edge Function: trimmed, lowercase.
+      const result = await signInWithUsername(identifier.trim().toLowerCase(), password);
       if (result.ok) {
         clearRecoveryMarker();
         setMsg("loginMsg", "");
