@@ -200,7 +200,8 @@ function renderAll() {
 // Project identity shown in the header, sidebar and login screen.
 function renderIdentity() {
   $("projectLine").textContent = identityLine().toUpperCase();
-  $("sideIdentity").innerHTML = `<b>${esc(PROJECT_IDENTITY.name)}</b>${esc(PROJECT_IDENTITY.company)}<br>${esc(PROJECT_IDENTITY.location)}`;
+  // The Soventix logo above already carries the company name. Below it: project name, then location.
+  $("sideIdentity").innerHTML = `<b>${esc(PROJECT_IDENTITY.name)}</b><span>${esc(PROJECT_IDENTITY.location)}</span>`;
   $("loginProjectName").textContent = PROJECT_IDENTITY.name;
   $("loginProjectLocation").textContent = PROJECT_IDENTITY.location;
 }
