@@ -962,8 +962,16 @@ function wireAuthForms() {
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + window.location.pathname,
     });
-    if (error) setMsg("resetMsg", "Could not send the reset link. Try again later.", "err");
-    else setMsg("resetMsg", "If an account exists for this email, a reset link has been sent.", "ok");
+    if (error) {
+      // Show the real reason (no secrets are in this message) and log details for debugging.
+      console.error("resetPasswordForEmail failed:", { status: error.status, code: error.code, message: error.message });
+      const rate = error.status === 429 || /rate limit/i.test(error.message || "");
+      setMsg("resetMsg", rate
+        ? "Too many reset emails were requested recently. Wait about an hour and try again."
+        : `Reset email could not be sent: ${error.message || "unknown error"}${error.code ? ` (${error.code})` : ""}.`, "err");
+    } else {
+      setMsg("resetMsg", "If an account exists for this email, a reset link has been sent.", "ok");
+    }
   });
 
   $("newPasswordForm").addEventListener("submit", async (e) => {
