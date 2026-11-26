@@ -19,7 +19,6 @@ const ROLE_LABEL = { admin: "Admin", engineer: "Engineer", viewer: "Viewer" };
 const USERNAME_LOGIN_ENABLED = false;
 
 // Project identity comes from js/project.js only. It is never read from the database.
-const identityLine = () => `${PROJECT_IDENTITY.company} · ${PROJECT_IDENTITY.name} · ${PROJECT_IDENTITY.location}`;
 
 // ---------------------------------------------------------------------
 // Small helpers
@@ -199,7 +198,6 @@ function renderAll() {
 
 // Project identity shown in the header, sidebar and login screen.
 function renderIdentity() {
-  $("projectLine").textContent = identityLine().toUpperCase();
   // The Soventix logo above already carries the company name. Below it: project name, then location.
   $("sideIdentity").innerHTML = `<b>${esc(PROJECT_IDENTITY.name)}</b><span>${esc(PROJECT_IDENTITY.location)}</span>`;
   $("loginProjectName").textContent = PROJECT_IDENTITY.name;
@@ -826,7 +824,6 @@ function nav(page) {
   $(page).classList.add("active");
   document.querySelectorAll(".nav button").forEach((x) => x.classList.toggle("active", x.dataset.page === page));
   $("topTitle").textContent = PAGE_TITLES[page] ?? "";
-  $("crumb").textContent = page.toUpperCase();
   window.scrollTo({ top: 0 });
 }
 
