@@ -861,6 +861,59 @@ document.addEventListener("change", async (e) => {
 // ---------------------------------------------------------------------
 // Authentication
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// Password recovery
+// With PKCE the reset link returns ?code=..., which supabase-js exchanges for a
+// normal session. That exchange may emit SIGNED_IN instead of PASSWORD_RECOVERY,
+// so recovery is recognised in three ways (any one is enough):
+//   1. the PASSWORD_RECOVERY event;
+//   2. a marker stored when this browser requested a reset (valid for 2 hours);
+//   3. the session's access token reporting the "recovery" auth method.
+// While recovery is active, the app stays on the new-password form and does not enter the dashboard.
+// ---------------------------------------------------------------------
+const RECOVERY_KEY = "gg_recovery_requested_at";
+const RECOVERY_WINDOW_MS = 2 * 60 * 60 * 1000;
+let recoveryMode = false;
+let arrivedWithAuthCode = false; // set once at start, from the URL before supabase-js clears it
+
+function markRecoveryRequested() {
+  try { localStorage.setItem(RECOVERY_KEY, String(Date.now())); } catch { /* storage unavailable */ }
+}
+function recoveryRequested() {
+  try {
+    const t = Number(localStorage.getItem(RECOVERY_KEY) || 0);
+    return t > 0 && Date.now() - t < RECOVERY_WINDOW_MS;
+  } catch { return false; }
+}
+function clearRecoveryMarker() {
+  try { localStorage.removeItem(RECOVERY_KEY); } catch { /* ignore */ }
+}
+function jwtPayload(token) {
+  try {
+    let b64 = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    b64 += "=".repeat((4 - (b64.length % 4)) % 4);
+    return JSON.parse(atob(b64));
+  } catch { return null; }
+}
+function sessionIsRecovery(session) {
+  const amr = jwtPayload(session?.access_token || "")?.amr || [];
+  return amr.some((a) => a?.method === "recovery");
+}
+function enterRecovery() {
+  recoveryMode = true;
+  showView("viewNewPassword");
+}
+function leaveRecovery() {
+  recoveryMode = false;
+  clearRecoveryMarker();
+}
+// Errors from an expired or already-used link arrive in the URL (hash or query).
+function linkErrorCode() {
+  const h = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+  const q = new URLSearchParams(window.location.search);
+  return h.get("error_code") || q.get("error_code") || "";
+}
+
 async function enter(session) {
   const user = session.user;
   const { data: profile, error } = await sb.from("profiles").select("id,full_name,role,is_active").eq("id", user.id).maybeSingle();
@@ -880,6 +933,12 @@ async function enter(session) {
 function wireAuthForms() {
   $("showResetBtn").addEventListener("click", () => { setMsg("resetMsg", ""); showView("viewReset"); });
   $("showLoginBtn").addEventListener("click", () => showView("viewLogin"));
+  $("cancelRecoveryBtn").addEventListener("click", async () => {
+    leaveRecovery();
+    await sb.auth.signOut();
+    setMsg("loginMsg", "Password not changed. You can request a new reset link.", "");
+    showView("viewLogin");
+  });
 
   $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -891,6 +950,7 @@ function wireAuthForms() {
     const { error } = await sb.auth.signInWithPassword({ email, password });
     // Same message for every failure, so the form does not reveal which emails exist.
     setMsg("loginMsg", error ? "Email or password is not correct." : "", error ? "err" : "");
+    if (!error) clearRecoveryMarker(); // a normal sign-in must not be treated as recovery
     e.target.password.value = "";
   });
 
@@ -898,6 +958,7 @@ function wireAuthForms() {
     e.preventDefault();
     const email = String(new FormData(e.target).get("email") || "").trim();
     if (!email) return setMsg("resetMsg", "Enter your email.", "err");
+    markRecoveryRequested();
     const { error } = await sb.auth.resetPasswordForEmail(email, {
       redirectTo: window.location.origin + window.location.pathname,
     });
@@ -915,6 +976,7 @@ function wireAuthForms() {
     if (error) return setMsg("newPasswordMsg", "Could not save the password. Request a new reset link.", "err");
     e.target.reset();
     setMsg("newPasswordMsg", "");
+    leaveRecovery();
     window.history.replaceState(null, "", window.location.pathname);
     const { data: { session } } = await sb.auth.getSession();
     if (session) await enter(session);
@@ -950,12 +1012,29 @@ function start() {
   $("equipDate").value = today();
   nav("overview");
 
+  // Read the URL before supabase-js processes and clears it.
+  arrivedWithAuthCode = /[?&#](code|access_token|type)=/.test(window.location.search + window.location.hash);
+  const linkError = linkErrorCode();
+  if (linkError) {
+    const expired = /otp_expired|expired/.test(linkError);
+    setMsg("loginMsg", expired
+      ? "This reset link has expired or was already used. Request a new one."
+      : "The link could not be verified. Request a new reset link.", "err");
+    window.history.replaceState(null, "", window.location.pathname);
+  }
+
   sb.auth.onAuthStateChange((event, session) => {
-    if (event === "PASSWORD_RECOVERY") return showView("viewNewPassword");
+    if (event === "PASSWORD_RECOVERY") { enterRecovery(); return; }
     if (event === "TOKEN_REFRESHED" || event === "USER_UPDATED") return;
     if (!session) {
+      if (recoveryMode) return; // keep the new-password form open
       resetState();
       return showView("viewLogin");
+    }
+    const recoveryLink = arrivedWithAuthCode && recoveryRequested();
+    if (recoveryMode || recoveryLink || sessionIsRecovery(session)) {
+      enterRecovery();
+      return;
     }
     // Defer: calling Supabase inside the auth callback can deadlock.
     setTimeout(() => enter(session), 0);
