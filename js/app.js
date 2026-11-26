@@ -2,6 +2,7 @@
 // Security is enforced by Postgres RLS and triggers. The UI only hides controls.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 import { PROJECT_IDENTITY } from "./project.js";
+import { ZONES, INVERTERS, TRANSFORMERS, REPORTS, SITE_STATUS_IS_DEMO, zoneSummary, siteTotals } from "./site-status.js";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm";
 
 // ---------------------------------------------------------------------
@@ -180,8 +181,68 @@ const actName = (id) => state.activities.find((a) => a.activity_id === id)?.name
 // ---------------------------------------------------------------------
 // Rendering
 // ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// Site status (Project Overview). Demo data from js/site-status.js.
+// ---------------------------------------------------------------------
+let selectedZone = null;
+const ZONE_COLOUR = { done: "#5E9A2B", "in-progress": "#D9831A", "not-started": "#8FA39F" };
+const INV_COLOUR = { installed: "#5E9A2B", pending: "#D9831A", fault: "#B3261E" };
+
+function renderSiteStatus() {
+  if (!$("siteBlock")) return;
+  $("siteDemo").style.display = SITE_STATUS_IS_DEMO ? "" : "none";
+  const t = siteTotals();
+  const kpi = (label, value, note) => `<div class="card"><div class="kpi-label">${esc(label)}</div><div class="kpi small">${esc(value)}</div><div class="kpi-note">${esc(note)}</div></div>`;
+  $("siteKpis").innerHTML = [
+    kpi("Mechanical progress", fmtPct(t.mech), "Piling, structure and modules"),
+    kpi("Electrical progress", fmtPct(t.elec), "Strings and inverters"),
+    kpi("Piles remaining", num(t.pilesRemaining), "Across all zones"),
+    kpi("Inverters installed", `${t.invInstalled} of ${t.invTotal}`, `${t.invPending} pending${t.invFault ? `, ${t.invFault} faulty` : ""}`),
+  ].join("");
+
+  const sums = ZONES.map((z) => zoneSummary(z));
+  $("zoneMap").innerHTML = sums.map((s) => `<button type="button" class="zone-tile${selectedZone === s.id ? " sel" : ""}" data-zone="${esc(s.id)}" style="background:${ZONE_COLOUR[s.status]}"><b>${esc(s.name)}</b><span>Mech ${fmtPct(s.mech)} · Elec ${fmtPct(s.elec)}</span></button>`).join("");
+
+  const sel = sums.find((s) => s.id === selectedZone);
+  $("zoneTitle").textContent = sel ? sel.name : "Select a zone";
+  $("zoneDetail").innerHTML = sel
+    ? `<div class="zone-detail-grid">
+        <div>Piles left<b>${num(sel.pilesRemaining)}</b></div>
+        <div>Structure left<b>${num(sel.structureRemaining)}</b></div>
+        <div>Modules left<b>${num(sel.modulesRemaining)}</b></div>
+        <div>Strings left<b>${num(sel.stringsRemaining)}</b></div>
+        <div>Inverters installed<b>${sel.invInstalled} of ${sel.invTotal}</b></div>
+        <div>Photos pending<b>${num(sel.photosPending)}</b></div>
+      </div>`
+    : `<p class="kpi-note">Tap a zone on the left to see its piles, modules, strings, inverters and photos.</p>`;
+
+  $("mechRows").innerHTML = sums.map((s) => `<tr><td>${esc(s.name)}</td><td>${num(s.pilesRemaining)}</td><td>${num(s.structureRemaining)}</td><td>${num(s.modulesRemaining)}</td><td>${fmtPct(s.mech)}</td></tr>`).join("");
+  $("elecRows").innerHTML = sums.map((s) => `<tr><td>${esc(s.name)}</td><td>${num(s.stringsRemaining)}</td><td>${s.invInstalled} of ${s.invTotal}</td><td>${fmtPct(s.elec)}</td><td>${num(s.photosPending)}</td></tr>`).join("");
+
+  $("invGrid").innerHTML = Object.entries(INVERTERS).map(([n, st]) =>
+    `<div class="inv-cell" style="background:${INV_COLOUR[st]}" title="Inverter ${esc(n)}: ${esc(st)}">${esc(n)}</div>`).join("");
+  $("txRow").innerHTML = TRANSFORMERS.map((x) =>
+    `<div class="tx"><b>${esc(x.id)}</b><br>${esc(x.zone)} · ${x.status === "installed" ? "Installed" : "Pending"}</div>`).join("");
+
+  const W = 640, H = 200, P = 28;
+  const xAt = (i) => P + (i * (W - 2 * P)) / Math.max(1, REPORTS.length - 1);
+  const yAt = (v) => H - P - (v / 100) * (H - 2 * P);
+  const line = (key) => REPORTS.map((r, i) => `${xAt(i).toFixed(1)},${yAt(r[key]).toFixed(1)}`).join(" ");
+  $("trendChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Cumulative mechanical and electrical progress over the daily reports">
+    <line x1="${P}" y1="${H - P}" x2="${W - P}" y2="${H - P}" stroke="#D7E1DE"/>
+    ${[0, 50, 100].map((v) => `<text x="2" y="${yAt(v) + 4}">${v}%</text>`).join("")}
+    <polyline fill="none" stroke="#16865b" stroke-width="3" points="${line("mech")}"/>
+    <polyline fill="none" stroke="#2F5F92" stroke-width="3" points="${line("elec")}"/>
+    ${REPORTS.map((r, i) => `<text x="${(xAt(i) - 16).toFixed(1)}" y="${H - 6}">${esc(r.date.slice(5))}</text>`).join("")}
+  </svg>`;
+
+  $("reportArchive").innerHTML = [...REPORTS].reverse().map((r) =>
+    `<tr><td>${esc(r.date)}</td><td>${fmtPct(r.mech)}</td><td>${fmtPct(r.elec)}</td><td class="wrap">${esc(r.note)}</td></tr>`).join("");
+}
+
 function renderAll() {
   renderHeader();
+  renderSiteStatus();
   renderNotice();
   renderOverview();
   renderSolar();
@@ -831,6 +892,8 @@ function nav(page) {
 // Event handling (delegated)
 // ---------------------------------------------------------------------
 document.addEventListener("click", async (e) => {
+  const zoneBtn = e.target.closest("[data-zone]");
+  if (zoneBtn) { selectedZone = zoneBtn.dataset.zone; return renderSiteStatus(); }
   const navBtn = e.target.closest("button[data-page]");
   if (navBtn) return nav(navBtn.dataset.page);
 
