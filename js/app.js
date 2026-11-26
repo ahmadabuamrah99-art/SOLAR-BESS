@@ -1,6 +1,7 @@
 // GreenGrid frontend: authentication, role-aware UI and Supabase data access.
 // Security is enforced by Postgres RLS and triggers. The UI only hides controls.
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+import { PROJECT_IDENTITY } from "./project.js";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm";
 
 // ---------------------------------------------------------------------
@@ -11,6 +12,14 @@ const CATEGORIES = ["Engineer", "Supervisor", "Technician", "Electrician", "Labo
 const ISSUE_CATEGORIES = ["Materials", "Technical", "Manpower", "Equipment", "Logistics", "Access", "Weather", "Other"];
 const BLOCK_STATUSES = ["Not Started", "In Progress", "Installed", "Commissioned"];
 const ROLE_LABEL = { admin: "Admin", engineer: "Engineer", viewer: "Viewer" };
+
+// Username sign-in is postponed. It needs the profiles.username column, the
+// Edge Function and the migration, none of which are applied yet. While this is false,
+// the app never reads or writes that column and the login form is email-only.
+const USERNAME_LOGIN_ENABLED = false;
+
+// Project identity comes from js/project.js only. It is never read from the database.
+const identityLine = () => `${PROJECT_IDENTITY.company} · ${PROJECT_IDENTITY.name} · ${PROJECT_IDENTITY.location}`;
 
 // ---------------------------------------------------------------------
 // Small helpers
@@ -126,7 +135,9 @@ let sb;
 
 async function loadAll() {
   // Profiles load first: admins need the user list even before a project exists.
-  const { data: profs, error: profErr } = await sb.from("profiles").select("id,full_name,role,is_active,username").order("full_name");
+  // Only columns that exist in the current database. "username" is added back only when the feature is enabled.
+  const profileColumns = USERNAME_LOGIN_ENABLED ? "id,full_name,role,is_active,username" : "id,full_name,role,is_active";
+  const { data: profs, error: profErr } = await sb.from("profiles").select(profileColumns).order("full_name");
   if (profErr) { toast(friendly(profErr), true); return; }
   state.profiles = profs ?? [];
   state.names = Object.fromEntries(state.profiles.map((p) => [p.id, p.full_name || "(no name)"]));
@@ -186,6 +197,14 @@ function renderAll() {
   renderUsers();
 }
 
+// Project identity shown in the header, sidebar and login screen.
+function renderIdentity() {
+  $("projectLine").textContent = identityLine().toUpperCase();
+  $("sideIdentity").innerHTML = `<b>${esc(PROJECT_IDENTITY.name)}</b>${esc(PROJECT_IDENTITY.company)}<br>${esc(PROJECT_IDENTITY.location)}`;
+  $("loginProjectName").textContent = PROJECT_IDENTITY.name;
+  $("loginProjectLocation").textContent = PROJECT_IDENTITY.location;
+}
+
 function renderHeader() {
   const name = state.profile?.full_name || state.user?.email || "User";
   $("userName").textContent = name;
@@ -204,7 +223,7 @@ function renderNotice() {
     n.innerHTML = "<strong>DEMO DATA.</strong> Sample quantities are illustrative only. Replace them with approved baseline quantities and verified installed quantities before issuing any report.";
   } else {
     n.className = "notice";
-    n.textContent = `Live project data: ${state.project.name}.`;
+    n.textContent = `Live project data: ${PROJECT_IDENTITY.name}.`;
   }
 }
 
@@ -363,16 +382,17 @@ function renderReportList() {
 }
 
 function renderSettings() {
+  // The project name is fixed in js/project.js. Only the capacity figures are editable here.
   const box = $("settingsBox");
   const p = state.project;
+  const identity = `<p><b>${esc(PROJECT_IDENTITY.name)}</b></p><p class="kpi-note">${esc(PROJECT_IDENTITY.company)} · ${esc(PROJECT_IDENTITY.location)} · Project name is fixed in the application.</p>`;
   if (!isAdmin()) {
-    box.innerHTML = p
-      ? `<p><b>${esc(p.name)}</b></p><p class="kpi-note">PV capacity: ${p.pv_capacity_mw ?? "Not verified"} MW · BESS capacity: ${p.bess_capacity_mwh ?? "Not verified"} MWh</p>`
-      : `<p class="sub">No project record yet. An Admin creates it.</p>`;
+    box.innerHTML = identity + (p
+      ? `<p class="kpi-note">PV capacity: ${p.pv_capacity_mw ?? "Not verified"} MW · BESS capacity: ${p.bess_capacity_mwh ?? "Not verified"} MWh</p>`
+      : `<p class="sub">No project record yet. An Admin creates it.</p>`);
     return;
   }
-  box.innerHTML = `<form id="settingsForm" novalidate>
-    ${field("Project name", input("name", { value: p?.name ?? "" }))}
+  box.innerHTML = identity + `<form id="settingsForm" novalidate>
     <div class="formgrid">
       ${field("PV capacity (MW)", input("pv", { type: "number", min: 0, step: "any", value: p?.pv_capacity_mw ?? "" }))}
       ${field("BESS capacity (MWh)", input("bess", { type: "number", min: 0, step: "any", value: p?.bess_capacity_mwh ?? "" }))}
@@ -383,18 +403,27 @@ function renderSettings() {
   $("settingsForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    const name = String(fd.get("name") || "").trim();
-    if (!name) return toast("Project name is required.", true);
-    const row = { name, pv_capacity_mw: numOrNull(fd.get("pv")), bess_capacity_mwh: numOrNull(fd.get("bess")) };
-    if (p) await save(sb.from("projects").update(row).eq("id", p.id), "Settings saved");
-    else await save(sb.from("projects").insert(row), "Project created");
+    // The name is always PROJECT_IDENTITY.name. It is never taken from the form or the database.
+    const capacities = { pv_capacity_mw: numOrNull(fd.get("pv")), bess_capacity_mwh: numOrNull(fd.get("bess")) };
+    if (p) await save(sb.from("projects").update(capacities).eq("id", p.id), "Settings saved");
+    else await save(sb.from("projects").insert({ name: PROJECT_IDENTITY.name, ...capacities }), "Project created");
   });
 }
 
 function renderUsers() {
-  if (!isAdmin()) { $("usersRows").innerHTML = ""; return; }
-  $("usersRows").innerHTML = state.profiles.map((p) => `<tr><td>${esc(p.full_name || "(no name)")}${p.id === state.user?.id ? " (you)" : ""}</td><td><input data-action="user-username" data-id="${esc(p.id)}" value="${esc(p.username || "")}" maxlength="30" placeholder="not set" aria-label="Username for ${esc(p.full_name || "user")}" style="min-width:160px;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></td><td><select data-action="user-role" data-id="${esc(p.id)}">${["admin", "engineer", "viewer"].map((r) => `<option value="${r}" ${r === p.role ? "selected" : ""}>${ROLE_LABEL[r]}</option>`).join("")}</select></td><td><input type="checkbox" data-action="user-active" data-id="${esc(p.id)}" ${p.is_active ? "checked" : ""} aria-label="Active"></td></tr>`).join("")
-    || empty(4, "No users yet");
+  const head = $("usersHead");
+  if (!isAdmin()) { $("usersRows").innerHTML = ""; head.innerHTML = ""; return; }
+  head.innerHTML = `<tr><th>Name</th>${USERNAME_LOGIN_ENABLED ? "<th>Username</th>" : ""}<th>Role</th><th>Active</th></tr>`;
+  const cols = USERNAME_LOGIN_ENABLED ? 4 : 3;
+  $("usersRows").innerHTML = state.profiles.map((p) => {
+    const nameCell = `<td>${esc(p.full_name || "(no name)")}${p.id === state.user?.id ? " (you)" : ""}</td>`;
+    const usernameCell = USERNAME_LOGIN_ENABLED
+      ? `<td><input data-action="user-username" data-id="${esc(p.id)}" value="${esc(p.username || "")}" maxlength="30" placeholder="not set" aria-label="Username for ${esc(p.full_name || "user")}" style="min-width:160px;padding:6px 8px;border:1px solid var(--line);border-radius:8px"></td>`
+      : "";
+    const roleCell = `<td><select data-action="user-role" data-id="${esc(p.id)}">${["admin", "engineer", "viewer"].map((r) => `<option value="${r}" ${r === p.role ? "selected" : ""}>${ROLE_LABEL[r]}</option>`).join("")}</select></td>`;
+    const activeCell = `<td><input type="checkbox" data-action="user-active" data-id="${esc(p.id)}" ${p.is_active ? "checked" : ""} aria-label="Active"></td>`;
+    return `<tr>${nameCell}${usernameCell}${roleCell}${activeCell}</tr>`;
+  }).join("") || empty(cols, "No users yet");
 }
 
 // ---------------------------------------------------------------------
@@ -453,7 +482,7 @@ function renderReportPreview(r) {
   const lines = r.lines.map((l) => `<tr><td class="wrap">${esc(l.name)}</td><td>${esc(l.workstream)}</td><td>${num(l.qty, 2)} ${esc(l.unit)}</td></tr>`).join("")
     || `<tr><td colspan="3" class="empty">No progress logged in this period</td></tr>`;
   $("reportPreview").innerHTML = `
-    <div class="notice">${esc(r.type)} report · ${esc(r.start)} to ${esc(r.end)} · ${esc(state.project?.name ?? "")}${state.project?.is_demo ? " · DEMO DATA" : ""}</div>
+    <div class="notice">${esc(r.type)} report · ${esc(r.start)} to ${esc(r.end)} · ${esc(PROJECT_IDENTITY.name)}${state.project?.is_demo ? " · DEMO DATA" : ""}</div>
     <h3>Progress logged in period</h3>
     <div class="tablewrap"><table><thead><tr><th>Activity</th><th>Workstream</th><th>Quantity added</th></tr></thead><tbody>${lines}</tbody></table></div>
     <h3 style="margin-top:14px">QA/QC</h3><p>${r.qaqc.total} records dated in period · ${r.qaqc.approved} approved · ${r.qaqc.pending} awaiting review</p>
@@ -854,6 +883,7 @@ document.addEventListener("change", async (e) => {
     return save(sb.from("profiles").update({ role: el.value }).eq("id", id), "Role updated");
   }
   if (action === "user-username") {
+    if (!USERNAME_LOGIN_ENABLED) return; // feature postponed: the column does not exist yet
     const current = state.profiles.find((p) => p.id === id)?.username ?? "";
     const value = el.value.trim().toLowerCase();
     if (value && !/^[a-z][a-z0-9_]{2,29}$/.test(value)) {
@@ -990,7 +1020,11 @@ function wireAuthForms() {
     const fd = new FormData(e.target);
     const identifier = String(fd.get("identifier") || "").trim();
     const password = String(fd.get("password") || "");
-    if (!identifier || !password) return setMsg("loginMsg", "Enter your email or username and password.", "err");
+    if (!identifier || !password) return setMsg("loginMsg", "Enter your email address and password.", "err");
+    if (!identifier.includes("@") && !USERNAME_LOGIN_ENABLED) {
+      // Username sign-in is postponed, so only email addresses are accepted for now.
+      return setMsg("loginMsg", "Enter your email address.", "err");
+    }
     setMsg("loginMsg", "Signing in…");
 
     if (identifier.includes("@")) {
@@ -1010,7 +1044,7 @@ function wireAuthForms() {
       } else if (result.reason === "unavailable") {
         setMsg("loginMsg", "Sign-in is temporarily unavailable. Try again shortly.", "err");
       } else {
-        setMsg("loginMsg", "Email or username or password is not correct.", "err");
+        setMsg("loginMsg", "Email or password is not correct.", "err");
       }
     }
     e.target.password.value = "";
@@ -1061,6 +1095,7 @@ function wireAuthForms() {
 // Start
 // ---------------------------------------------------------------------
 function start() {
+  renderIdentity();
   const problem = configProblem();
   if (problem) {
     showView("viewSetup");
