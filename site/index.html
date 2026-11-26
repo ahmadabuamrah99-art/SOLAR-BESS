@@ -1,4 +1,6 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}.model-view .stage{height:100vh!important;min-height:0!important;border:0!important;border-radius:0!important}
+.model-view body{background:#dfe9ea}
+</style></head><body>
 <title>Baomahun Site Progress</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -798,4 +800,29 @@ wireUI();loadPublished();initCaps();
 })();
 </script>
 
+<script>
+/* Drawing-only mode for the GreenGrid Overview: ?view=model shows just the 3D stage.
+   Also listens for zone requests from the parent page (postMessage {type:'zone', zone:'SP1'}). */
+(function(){
+  var q=new URLSearchParams(location.search);
+  if(q.get('view')==='model'){
+    document.documentElement.classList.add('model-view');
+    var stage=document.getElementById('stage');
+    if(stage){
+      var keep=new Set([stage]);
+      for(var e=stage;e;e=e.parentElement) keep.add(e);
+      keep.forEach(function(el){
+        if(el===stage) return; // keep everything inside the drawing (controls, legend, canvas)
+        Array.prototype.forEach.call(el.children,function(c){ if(!keep.has(c)) c.style.display='none'; });
+      });
+      document.body.style.padding='0';
+    }
+  }
+  window.addEventListener('message',function(ev){
+    var d=ev.data; if(!d||d.type!=='zone'||typeof d.zone!=='string') return;
+    var btn=document.getElementById('cam-'+d.zone.toLowerCase());
+    if(btn) btn.click();
+  });
+})();
+</script>
 </body></html>

@@ -41,8 +41,8 @@
  .topbar-right{width:100%;justify-content:space-between}
 }
 /* Site sketch (Project Overview) */
-.site-sketch{display:block;width:100%;height:1100px;border:0;border-radius:8px;background:#fff}
-@media (max-width:700px){.site-sketch{height:1250px}}
+.site-sketch{display:block;width:100%;height:660px;border:0;border-radius:8px;background:#dfe9ea}
+@media (max-width:700px){.site-sketch{height:520px}}
 /* Site status block (Project Overview) */
 .site-block{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
 .site-block h2{margin:4px 0 0}
@@ -183,18 +183,17 @@
    <div class="card"><div class="kpi-label">Open Issues</div><div class="kpi" id="openIssues">0</div><div class="kpi-note">Issues not yet closed</div></div>
   </div>
   <div class="card site-sketch-card" style="margin-top:16px">
-   <h2>Where the site stands today</h2>
-   <p class="kpi-note">Interactive site sketch. Drag to rotate, scroll to zoom. Colours show installed progress by table and inverter. The figures are the site sketch's own data.</p>
-   <iframe class="site-sketch" src="site/index.html" title="Baomahun site progress sketch" loading="lazy"></iframe>
+   <iframe class="site-sketch" src="site/index.html?view=model" title="Baomahun site model: 3D drawing with zoom controls" loading="lazy"></iframe>
   </div>
-  <div class="card" style="margin-top:16px"><h2>Priority Activities</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Planned</th><th>Actual</th><th>Variance</th><th>Status</th></tr></thead><tbody id="priorityRows"></tbody></table></div></div>
-
- <div class="site-block" id="zonesBlock">
+  <div class="site-block" id="zonesBlock">
   <div class="sec-head"><div><div class="eyebrow">Zones</div><h2>Zone progress</h2></div><span class="pill warn">Sample figures</span></div>
   <p class="kpi-note">Tap a zone to see its piling, structure, module and inverter progress.</p>
   <div id="zoneButtons" class="zone-map"></div>
   <div class="card" style="margin-top:16px"><h3 id="zoneTitle">Select a zone</h3><div id="zoneDetail"><p class="kpi-note">No zone selected.</p></div></div>
- </div>
+
+  <div class="card" style="margin-top:16px"><h2>Priority Activities</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Planned</th><th>Actual</th><th>Variance</th><th>Status</th></tr></thead><tbody id="priorityRows"></tbody></table></div></div>
+
+  </div>
  </section>
 
  <section id="solar" class="section">

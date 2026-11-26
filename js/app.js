@@ -192,6 +192,12 @@ function renderZones() {
   btns.innerHTML = zoneSummaries().map((s) =>
     `<button type="button" class="zone-tile${selectedZone === s.zone ? " sel" : ""}" data-zone="${esc(s.zone)}"><b>${esc(s.zone)}</b><span>Piling ${fmtPct(s.piling)} · Modules ${fmtPct(s.modules)}</span><span>${s.tables} tables · ${s.inverters} inverters</span></button>`).join("");
 
+  // Fly the drawing to the selected zone (the sketch listens for this message).
+  const frame = document.querySelector("iframe.site-sketch");
+  if (frame && frame.contentWindow && selectedZone) {
+    frame.contentWindow.postMessage({ type: "zone", zone: selectedZone }, location.origin);
+  }
+
   if (!selectedZone) {
     $("zoneTitle").textContent = "Select a zone";
     $("zoneDetail").innerHTML = `<p class="kpi-note">No zone selected.</p>`;
