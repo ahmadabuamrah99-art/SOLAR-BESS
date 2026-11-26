@@ -49,8 +49,10 @@
 .zone-map{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
 .zone-tile{border:0;border-radius:10px;padding:14px 10px;color:#fff;text-align:left;cursor:pointer;min-height:86px;font:inherit}
 .zone-tile b{display:block;font-size:15px}
-.zone-tile span{font-size:12px;opacity:.95}
+.zone-tile span{display:block;font-size:12px;opacity:.95;margin-top:2px}
+.zone-tile{background:#1F4F59}
 .zone-tile.sel{outline:3px solid var(--ink);outline-offset:2px}
+.zone-h{margin:14px 0 6px;font-size:13px;color:var(--muted);font-weight:650}
 .legend-row{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
 .legend-row .sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
 .site-table{width:100%;font-size:12px;border-collapse:collapse}
@@ -187,26 +189,11 @@
   </div>
   <div class="card" style="margin-top:16px"><h2>Priority Activities</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Planned</th><th>Actual</th><th>Variance</th><th>Status</th></tr></thead><tbody id="priorityRows"></tbody></table></div></div>
 
- <div class="site-block" id="siteBlock">
-  <div class="sec-head"><div><div class="eyebrow">Site status</div><h2>Where the site stands today</h2></div><span class="pill warn" id="siteDemo" style="display:none">DEMO DATA: illustrative numbers, not project facts</span></div>
-  <div class="grid kpis" id="siteKpis"></div>
-
-  <div class="grid two">
-   <div class="card"><h3>Zones at a glance</h3><p class="kpi-note">Colour shows each zone's mechanical status. Tap a zone for its details.</p><div id="zoneMap" class="zone-map"></div><div class="legend-row"><span><i class="sw" style="background:#5E9A2B"></i>Done</span><span><i class="sw" style="background:#D9831A"></i>In progress</span><span><i class="sw" style="background:#8FA39F"></i>Not started</span></div></div>
-   <div class="card"><h3 id="zoneTitle">Select a zone</h3><div id="zoneDetail"><p class="kpi-note">No zone selected.</p></div></div>
-  </div>
-
-  <div class="grid two" style="margin-top:16px">
-   <div class="card"><h3>Mechanical works by zone</h3><p class="kpi-note">Piling, structure and modules. Remaining quantities are per zone.</p><div class="tablewrap"><table class="site-table"><thead><tr><th>Zone</th><th>Piles left</th><th>Structure left</th><th>Modules left</th><th>Mech %</th></tr></thead><tbody id="mechRows"></tbody></table></div></div>
-   <div class="card"><h3>Electrical works by zone</h3><p class="kpi-note">Strings and inverters installed per zone.</p><div class="tablewrap"><table class="site-table"><thead><tr><th>Zone</th><th>Strings left</th><th>Inverters</th><th>Elec %</th><th>Photos pending</th></tr></thead><tbody id="elecRows"></tbody></table></div></div>
-  </div>
-
-  <div class="card" style="margin-top:16px"><h3>Inverter status</h3><p class="kpi-note">Each square is one inverter. Green is installed, amber is pending, red is faulty.</p><div id="invGrid" class="inv-grid"></div><div class="legend-row"><span><i class="sw" style="background:#5E9A2B"></i>Installed</span><span><i class="sw" style="background:#D9831A"></i>Pending</span><span><i class="sw" style="background:#B3261E"></i>Fault</span></div><h3 style="margin-top:14px">Transformers</h3><div id="txRow" class="tx-row"></div></div>
-
-  <div class="grid two" style="margin-top:16px">
-   <div class="card"><h3>Progress over the reports</h3><p class="kpi-note">Cumulative progress as reported each day.</p><div id="trendChart" class="trend-chart"></div><div class="legend-row"><span><i class="sw" style="background:#16865b"></i>Mechanical %</span><span><i class="sw" style="background:#2F5F92"></i>Electrical %</span></div></div>
-   <div class="card"><h3>Daily report archive</h3><div class="tablewrap"><table class="site-table"><thead><tr><th>Date</th><th>Mech %</th><th>Elec %</th><th>Note</th></tr></thead><tbody id="reportArchive"></tbody></table></div></div>
-  </div>
+ <div class="site-block" id="zonesBlock">
+  <div class="sec-head"><div><div class="eyebrow">Zones</div><h2>Zone progress</h2></div><span class="pill warn">Sample figures</span></div>
+  <p class="kpi-note">Tap a zone to see its piling, structure, module and inverter progress.</p>
+  <div id="zoneButtons" class="zone-map"></div>
+  <div class="card" style="margin-top:16px"><h3 id="zoneTitle">Select a zone</h3><div id="zoneDetail"><p class="kpi-note">No zone selected.</p></div></div>
  </div>
  </section>
 
