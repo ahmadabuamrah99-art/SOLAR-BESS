@@ -850,7 +850,8 @@ function nav(page) {
   document.querySelectorAll(".section").forEach((x) => x.classList.remove("active"));
   $(page).classList.add("active");
   document.querySelectorAll(".nav button").forEach((x) => x.classList.toggle("active", x.dataset.page === page));
-  $("topTitle").textContent = PAGE_TITLES[page] ?? "";
+  // Header: project name, slash, then the page name (Overview for the dashboard).
+  $("topTitle").textContent = `${PROJECT_IDENTITY.name} / ${page === "overview" ? "Overview" : (PAGE_TITLES[page] ?? "")}`;
   window.scrollTo({ top: 0 });
 }
 
