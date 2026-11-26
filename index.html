@@ -40,6 +40,9 @@
  .formgrid{grid-template-columns:1fr}
  .topbar-right{width:100%;justify-content:space-between}
 }
+/* Site sketch (Project Overview) */
+.site-sketch{display:block;width:100%;height:1100px;border:0;border-radius:8px;background:#fff}
+@media (max-width:700px){.site-sketch{height:1250px}}
 /* Site status block (Project Overview) */
 .site-block{margin-top:28px;padding-top:24px;border-top:1px solid var(--line)}
 .site-block h2{margin:4px 0 0}
@@ -177,9 +180,10 @@
    <div class="card"><div class="kpi-label">Activities Complete</div><div class="kpi" id="completeCount">0</div><div class="kpi-note" id="completeNote">Activities at 100% of planned quantity</div></div>
    <div class="card"><div class="kpi-label">Open Issues</div><div class="kpi" id="openIssues">0</div><div class="kpi-note">Issues not yet closed</div></div>
   </div>
-  <div class="grid two">
-   <div class="card"><h2>Planned vs Actual by Activity</h2><div class="chart" id="chart"></div><div class="legend"><span><i style="background:#cde8d7"></i>Planned %</span><span><i style="background:#16865b"></i>Actual %</span></div></div>
-   <div class="card"><h2>Workstream & Discipline</h2><p class="kpi-note">Quantities are not added across different units. Weighted progress appears only after verified weights are entered by an Admin.</p><div id="workstreams"></div></div>
+  <div class="card site-sketch-card" style="margin-top:16px">
+   <h2>Where the site stands today</h2>
+   <p class="kpi-note">Interactive site sketch. Drag to rotate, scroll to zoom. Colours show installed progress by table and inverter. The figures are the site sketch's own data.</p>
+   <iframe class="site-sketch" src="site/index.html" title="Baomahun site progress sketch" loading="lazy"></iframe>
   </div>
   <div class="card" style="margin-top:16px"><h2>Priority Activities</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Planned</th><th>Actual</th><th>Variance</th><th>Status</th></tr></thead><tbody id="priorityRows"></tbody></table></div></div>
 

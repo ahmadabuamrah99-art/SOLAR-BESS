@@ -310,18 +310,6 @@ function renderOverview() {
   $("completeCount").textContent = `${done}/${acts.length}`;
   $("openIssues").textContent = state.issues.filter((i) => i.status !== "Closed").length;
 
-  const withPlan = acts.filter((a) => a.planned_pct != null).slice(0, 14);
-  $("chart").innerHTML = withPlan.length
-    ? withPlan.map((a, i) => `<div class="barwrap" title="${esc(a.name)}"><div class="bar" style="height:${Number(a.planned_pct)}%"></div><div class="bar actual" style="height:${Number(a.progress_pct)}%"></div><span class="barlabel">${i + 1}</span></div>`).join("")
-    : emptyBox("No planned % set for activities yet.");
-
-  $("workstreams").innerHTML = state.byDiscipline.length
-    ? state.byDiscipline.map((r) => {
-        const share = r.activity_count ? Math.round((r.completed_activity_count / r.activity_count) * 100) : 0;
-        return `<div class="progressrow"><div class="rowtop"><span>${esc(r.workstream)} · ${esc(r.discipline)}</span><b>${r.weighted_progress_pct != null ? fmtPct(r.weighted_progress_pct) : "Pending weights"}</b></div><div class="track"><div class="fill" style="width:${share}%"></div></div><div class="kpi-note">${r.completed_activity_count} of ${r.activity_count} activities complete</div></div>`;
-      }).join("")
-    : emptyBox("No activities yet.");
-
   const scored = acts
     .filter((a) => a.planned_pct != null)
     .map((a) => ({ a, v: Number(a.progress_pct) - Number(a.planned_pct) }))
