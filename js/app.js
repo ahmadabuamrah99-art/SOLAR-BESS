@@ -224,9 +224,61 @@ function renderZones() {
     <div class="inv-grid">${z.inverters.list.map(chip).join("")}</div>`;
 }
 
+// ---------------------------------------------------------------------
+// Solar PV progress by period (daily, weekly, monthly), per mechanical or electrical works.
+// Quantities stay per activity and in the activity's own unit.
+// ---------------------------------------------------------------------
+let solarDiscipline = "Mechanical";
+let solarPeriod = "Daily";
+
+function isoWeekKey(dateStr) {
+  const d = new Date(`${dateStr}T00:00:00Z`);
+  const day = (d.getUTCDay() + 6) % 7; // Monday = 0
+  d.setUTCDate(d.getUTCDate() - day + 3); // Thursday of this ISO week
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+  const week = 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7);
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, "0")}`;
+}
+
+function periodKey(dateStr, period) {
+  if (period === "Weekly") return isoWeekKey(dateStr);
+  if (period === "Monthly") return dateStr.slice(0, 7);
+  return dateStr;
+}
+
+function renderSolarPeriods() {
+  const body = $("periodRows");
+  if (!body) return;
+  document.querySelectorAll("[data-disc]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.disc === solarDiscipline)));
+  document.querySelectorAll("[data-period]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.period === solarPeriod)));
+  $("periodTitle").textContent = `${solarDiscipline} works: ${solarPeriod.toLowerCase()}`;
+
+  const acts = new Map(state.activities
+    .filter((a) => a.workstream === "Solar PV" && a.discipline === solarDiscipline)
+    .map((a) => [a.activity_id, a]));
+  // One row per period and activity, with quantities added in that period (never added across activities).
+  const groups = new Map();
+  state.progress.forEach((p) => {
+    if (!acts.has(p.activity_id)) return;
+    const key = periodKey(p.entry_date, solarPeriod);
+    const id = `${key}|${p.activity_id}`;
+    const g = groups.get(id) || { key, a: acts.get(p.activity_id), qty: 0, notes: [], by: new Set() };
+    g.qty += Number(p.qty_added) || 0;
+    if (p.notes) g.notes.push(p.notes);
+    g.by.add(state.names[p.created_by] ?? "—");
+    groups.set(id, g);
+  });
+  const rows = [...groups.values()].sort((x, y) => (x.key < y.key ? 1 : x.key > y.key ? -1 : x.a.sort_order - y.a.sort_order));
+
+  body.innerHTML = rows.slice(0, 300).map((r) =>
+    `<tr><td>${esc(r.key)}</td><td class="wrap">${esc(r.a.name)}</td><td>${num(r.qty, 2)} ${esc(r.a.unit)}</td><td class="wrap">${esc(r.notes.join("; "))}</td><td>${esc([...r.by].join(", "))}</td></tr>`).join("")
+    || empty(5, `No ${solarDiscipline.toLowerCase()} progress logged yet`);
+}
+
 function renderAll() {
   renderHeader();
   renderZones();
+  renderSolarPeriods();
   renderNotice();
   renderOverview();
   renderSolar();
@@ -867,6 +919,10 @@ function nav(page) {
 document.addEventListener("click", async (e) => {
   const zoneBtn = e.target.closest("[data-zone]");
   if (zoneBtn) { selectedZone = zoneBtn.dataset.zone; return renderZones(); }
+  const discBtn = e.target.closest("[data-disc]");
+  if (discBtn) { solarDiscipline = discBtn.dataset.disc; return renderSolarPeriods(); }
+  const periodBtn = e.target.closest("[data-period]");
+  if (periodBtn) { solarPeriod = periodBtn.dataset.period; return renderSolarPeriods(); }
   const navBtn = e.target.closest("button[data-page]");
   if (navBtn) return nav(navBtn.dataset.page);
 

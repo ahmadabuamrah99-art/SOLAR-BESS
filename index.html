@@ -154,12 +154,7 @@
  <div class="nav" id="nav">
   <button class="active" data-page="overview">▦ &nbsp; Overview</button>
   <button data-page="solar">☀ &nbsp; Solar PV Progress</button>
-  <button data-page="bess">▣ &nbsp; BESS Progress</button>
-  <button data-page="schedule">◷ &nbsp; Schedule & Planning</button>
   <button data-page="qaqc">✓ &nbsp; QA/QC</button>
-  <button data-page="hse">＋ &nbsp; HSE</button>
-  <button data-page="manpower">♙ &nbsp; Manpower & Equipment</button>
-  <button data-page="issues">⚑ &nbsp; Issues & Risks</button>
   <button data-page="reports">▤ &nbsp; Reports & Data</button>
  </div>
 </aside>
@@ -198,6 +193,8 @@
 
  <section id="solar" class="section">
   <div class="heading"><div><div class="eyebrow">Generation assets</div><h1>Solar PV Progress</h1><div class="sub">Track mechanical and electrical installation by measurable quantities.</div></div><div class="actions"><button data-admin data-action="add-activity" data-area="Solar PV">＋ Add Activity</button></div></div>
+  <div class="seg-tabs" role="group" aria-label="Works"><button type="button" data-disc="Mechanical" aria-pressed="true">Mechanical works</button><button type="button" data-disc="Electrical" aria-pressed="false">Electrical works</button></div>
+  <div class="card" style="margin-top:16px"><div class="inline" style="justify-content:space-between"><h2 id="periodTitle" style="margin:0">Mechanical works: daily</h2><div class="seg-tabs" role="group" aria-label="Period"><button type="button" data-period="Daily" aria-pressed="true">Daily</button><button type="button" data-period="Weekly" aria-pressed="false">Weekly</button><button type="button" data-period="Monthly" aria-pressed="false">Monthly</button></div></div><p class="kpi-note">What was installed in each period. Quantities are shown per activity, in the activity's own unit.</p><div class="tablewrap"><table><thead><tr><th>Period</th><th>Activity</th><th>Quantity added</th><th>Notes</th><th>Logged by</th></tr></thead><tbody id="periodRows"></tbody></table></div></div>
   <div class="grid two"><div class="card"><h2>Mechanical Works</h2><div id="solarMechanical"></div></div><div class="card"><h2>Electrical Works</h2><div id="solarElectrical"></div></div></div>
   <div class="card" style="margin-top:16px"><h2>Solar PV Activity Register</h2><div class="tablewrap"><table><thead><tr><th>Activity</th><th>Discipline</th><th>Unit</th><th>Planned Qty</th><th>Installed Qty</th><th>Progress</th><th>Action</th></tr></thead><tbody id="solarRows"></tbody></table></div></div>
  </section>
