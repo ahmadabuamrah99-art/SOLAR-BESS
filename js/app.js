@@ -3,6 +3,7 @@
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 import { PROJECT_IDENTITY } from "./project.js";
 import { zoneSummaries, zoneStages } from "./site-zones.js";
+import { QAQC_GROUPS } from "./qaqc-stages.js";
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm";
 
 // ---------------------------------------------------------------------
@@ -391,7 +392,28 @@ function renderSchedule() {
   }).join("") || empty(6, "No progress updates logged yet");
 }
 
+// QA/QC by work stage: finished (activity at 100%), inspected (an approved QA/QC record) and number of checks.
+function qaqcStageRow(st) {
+  const acts = state.activities.filter((a) => st.match.test(a.name));
+  if (!acts.length) {
+    return `<tr><td>${esc(st.label)}</td><td colspan="3" class="kpi-note">not linked (no matching activity)</td></tr>`;
+  }
+  const ids = new Set(acts.map((a) => a.activity_id));
+  const finished = acts.every((a) => Number(a.progress_pct) >= 100);
+  const records = state.qaqc.filter((r) => r.activity_id && ids.has(r.activity_id));
+  const inspected = records.some((r) => r.status === "Approved");
+  const yn = (v) => (v ? `<span class="pill">Yes</span>` : `<span class="pill gray">No</span>`);
+  return `<tr><td>${esc(st.label)}</td><td>${yn(finished)}</td><td>${yn(inspected)}</td><td>${records.length}</td></tr>`;
+}
+
+function renderQaqcStages() {
+  const box = $("qaqcStages");
+  if (!box) return;
+  box.innerHTML = QAQC_GROUPS.map((g) => `<div class="card" style="margin-top:16px"><h2>${esc(g.name)}</h2><div class="tablewrap"><table class="site-table"><thead><tr><th>Stage</th><th>Finished</th><th>Inspected</th><th>Checks</th></tr></thead><tbody>${g.stages.map(qaqcStageRow).join("")}</tbody></table></div></div>`).join("");
+}
+
 function renderQaqc() {
+  renderQaqcStages();
   const q = state.qaqc;
   $("qaqcKpis").innerHTML = [["Total Records", q.length], ["Approved", q.filter((x) => x.status === "Approved").length], ["Awaiting Review", q.filter((x) => x.status === "Submitted").length]]
     .map(([l, v]) => `<div class="card"><div class="kpi-label">${l}</div><div class="kpi">${v}</div></div>`).join("");
