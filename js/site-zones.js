@@ -40,24 +40,16 @@ export function zoneStages(zone) {
   // inverter install, module install, module alignment, DC cable.
   const sequence = [
     step("ramming", "1. Ramming (piling)", sum((r) => r[0]), n * PER_TABLE.piles),
-    step("sliding", "2. Structure: sliding (vertical tubes)", sum((r) => r[3] + r[4]), n * PER_TABLE.vtubes),
-    step("queue", "2. Structure: queue (C-rails)", sum((r) => r[1] + r[2]), n * PER_TABLE.crails),
-    step("serial", "2. Structure: serial", 0, 0, false),
-    step("inv-structure", "3. Install structure for inverter", 0, 0, false),
-    step("inv-install", "4. Install inverter", invs.filter((v) => v.mounted).length, m),
-    step("modules", "5. Install modules", sum((r) => r[5] + r[6]), n * PER_TABLE.modules),
-    step("module-align", "6. Module alignment", 0, 0, false),
-    step("dc-cable", "7. Pull DC cable", invs.filter((v) => v.dc).length, m),
+    step("structure", "2. Install structure (C-rails / vertical tubes)", sum((r) => r[1] + r[2] + r[3] + r[4]), n * (PER_TABLE.crails + PER_TABLE.vtubes)),
+    step("alignment", "3. Structure alignment", 0, 0, false),
+    step("inv-structure", "4. Install inverter structure", 0, 0, false),
+    step("inv-install", "5. Install inverter", invs.filter((v) => v.mounted).length, m),
+    step("modules", "6. Module installation", sum((r) => r[5] + r[6]), n * PER_TABLE.modules),
+    step("module-align", "7. Module alignment", 0, 0, false),
+    step("dc-cable", "8. Pull DC cable", invs.filter((v) => v.dc).length, m),
   ];
 
-  // Inverter electrical steps after the DC cable.
-  const further = [
-    step("strings", "Strings installed", invs.reduce((s, v) => s + v.strings, 0), m * STRINGS_PER_INVERTER),
-    step("ac", "AC connected", invs.filter((v) => v.ac).length, m),
-    step("comm", "Commissioned", invs.filter((v) => v.comm).length, m),
-  ];
-
-  return { zone, tables: n, sequence, further, inverters: { count: m, list: invs } };
+  return { zone, tables: n, sequence, inverters: { count: m, list: invs } };
 }
 
 export function zoneSummaries() {

@@ -218,7 +218,6 @@ function renderZones() {
   $("zoneTitle").textContent = `${z.zone} · ${z.tables} tables · ${z.inverters.count} inverters`;
   $("zoneDetail").innerHTML = `
     <h4 class="zone-h">Construction sequence</h4>${z.sequence.map(row).join("")}
-    <h4 class="zone-h">Inverter electrical</h4>${z.further.map(row).join("")}
     <h4 class="zone-h">Inverter status (green = commissioned, amber = in progress, grey = not started)</h4>
     <div class="inv-grid">${z.inverters.list.map(chip).join("")}</div>`;
 }
