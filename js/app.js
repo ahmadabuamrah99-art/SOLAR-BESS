@@ -204,7 +204,12 @@ function renderZones() {
     return;
   }
   const z = zoneStages(selectedZone);
-  const row = (x) => `<div class="progressrow"><div class="rowtop"><span>${esc(x.label)}</span><b>${fmtPct(x.pct)} <span class="kpi-note">(${num(x.done)} of ${num(x.total)})</span></b></div><div class="track"><div class="fill" style="width:${x.pct}%"></div></div></div>`;
+  const row = (x) => {
+    if (!x.hasData) {
+      return `<div class="progressrow"><div class="rowtop"><span>${esc(x.label)}</span><b class="kpi-note">No data yet</b></div><div class="track"></div></div>`;
+    }
+    return `<div class="progressrow"><div class="rowtop"><span>${esc(x.label)}</span><b>${fmtPct(x.pct)} <span class="kpi-note">(${num(x.done)} of ${num(x.total)})</span></b></div><div class="track"><div class="fill" style="width:${x.pct}%"></div></div></div>`;
+  };
   const chip = (v) => {
     const colour = v.comm ? "#5E9A2B" : (v.strings > 0 || v.mounted || v.dc || v.ac) ? "#D9831A" : "#8FA39F";
     const short = v.id.replace(/^TX\d+-/, "");
@@ -212,8 +217,8 @@ function renderZones() {
   };
   $("zoneTitle").textContent = `${z.zone} · ${z.tables} tables · ${z.inverters.count} inverters`;
   $("zoneDetail").innerHTML = `
-    <h4 class="zone-h">Mechanical</h4>${z.stages.map(row).join("")}
-    <h4 class="zone-h">Inverters</h4>${z.inverters.stages.map(row).join("")}
+    <h4 class="zone-h">Construction sequence</h4>${z.sequence.map(row).join("")}
+    <h4 class="zone-h">Inverter electrical</h4>${z.further.map(row).join("")}
     <h4 class="zone-h">Inverter status (green = commissioned, amber = in progress, grey = not started)</h4>
     <div class="inv-grid">${z.inverters.list.map(chip).join("")}</div>`;
 }
