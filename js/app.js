@@ -211,14 +211,16 @@ function renderZones() {
     return `<div class="progressrow"><div class="rowtop"><span>${esc(x.label)}</span><b>${fmtPct(x.pct)} <span class="kpi-note">(${num(x.done)} of ${num(x.total)})</span></b></div><div class="track"><div class="fill" style="width:${x.pct}%"></div></div></div>`;
   };
   const chip = (v) => {
-    const colour = v.comm ? "#5E9A2B" : (v.strings > 0 || v.mounted || v.dc || v.ac) ? "#D9831A" : "#8FA39F";
+    // Three states: grey = not installed, amber = installed (not terminated), green = installed and terminated (DC and AC).
+    const colour = v.dc && v.ac ? "#5E9A2B" : v.mounted ? "#D9831A" : "#8FA39F";
     const short = v.id.replace(/^TX\d+-/, "");
     return `<span class="inv-cell" style="background:${colour}" title="${esc(v.id)}: strings ${v.strings} of 24, mounted ${v.mounted ? "yes" : "no"}, DC ${v.dc ? "yes" : "no"}, AC ${v.ac ? "yes" : "no"}, commissioned ${v.comm ? "yes" : "no"}">${esc(short)}</span>`;
   };
   $("zoneTitle").textContent = `${z.zone} · ${z.tables} tables · ${z.inverters.count} inverters`;
   $("zoneDetail").innerHTML = `
     <h4 class="zone-h">Construction sequence</h4>${z.sequence.map(row).join("")}
-    <h4 class="zone-h">Inverter status (green = commissioned, amber = in progress, grey = not started)</h4>
+    <h4 class="zone-h">Inverter status</h4>
+    <div class="legend-row"><span><i class="sw" style="background:#8FA39F"></i>Not installed</span><span><i class="sw" style="background:#D9831A"></i>Installed, not terminated</span><span><i class="sw" style="background:#5E9A2B"></i>Installed and terminated</span></div>
     <div class="inv-grid">${z.inverters.list.map(chip).join("")}</div>`;
 }
 
